@@ -21,6 +21,7 @@ export interface SEOAuditData {
     httpsSecurity: string;
     mixedContent: boolean;
     mixedContentUrls: string[];
+    suggestions: string[];
     brokenInternalLinks: {
       count: number;
       list: string[];
@@ -56,6 +57,7 @@ export interface SEOAuditData {
     pageRank: number;
     toxicLinks: number;
     referringDomains: number;
+    topReferringDomains: string[];
   };
 }
 

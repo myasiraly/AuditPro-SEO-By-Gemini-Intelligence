@@ -17,19 +17,20 @@ export class GeminiService {
       Simulate a deep crawl of the top 20 pages. 
       Calculate Site Health using this formula: Health = 100 - (((Errors * 5) + (Warnings * 2) + (Notices * 0.5)) / TotalPages).
       
-      Analyze:
+      Analyze and provide specific data for:
       1. Technical: Redirect chains, robots.txt, HTTPS, mixed content. 
-         Specifically detect and LIST:
          - Broken internal links (404 errors on target site domain).
          - Broken external links (404 errors on outbound domains).
-         - Mixed content resources: Identify the SPECIFIC HTTP URLs (e.g., http://example.com/image.jpg, http://cdn.test/script.js) loaded on the HTTPS site.
+         - Mixed content resources: Identify SPECIFIC HTTP URLs.
+         - Suggestions: Provide at least 3 actionable technical SEO fix suggestions (e.g., "Implement HSTS", "Fix 301 redirect chain on /about-us").
       2. On-Page: Missing/Duplicate titles, meta descriptions, H1s, Image alt tags, image sizes (>100kb).
       3. Speed: Simulated PageSpeed metrics (LCP, FID, CLS, TTI).
       4. Backlinks: Simulated Authority metrics and Toxic Link flagging.
+         - Top Referring Domains: Provide a list of 5 realistic domain names currently linking to this site (e.g., techcrunch.com, github.com).
       5. Content: Word counts (thin content < 300 words), duplicate content detection.
       6. SWOT Analysis: Strengths, Weaknesses, Opportunities, Threats.
 
-      Ensure the data is realistic for the provided URLs. For mixed content, provide a realistic list of at least 2-3 resource URLs if any issues are simulated.
+      Ensure the data is realistic for the provided URLs.
     `;
 
     const response = await this.ai.models.generateContent({
@@ -78,6 +79,7 @@ export class GeminiService {
                     httpsSecurity: { type: Type.STRING },
                     mixedContent: { type: Type.BOOLEAN },
                     mixedContentUrls: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    suggestions: { type: Type.ARRAY, items: { type: Type.STRING } },
                     brokenInternalLinks: {
                       type: Type.OBJECT,
                       properties: {
@@ -101,6 +103,7 @@ export class GeminiService {
                     "httpsSecurity", 
                     "mixedContent", 
                     "mixedContentUrls",
+                    "suggestions",
                     "brokenInternalLinks", 
                     "brokenExternalLinks"
                   ]
@@ -148,9 +151,10 @@ export class GeminiService {
                     domainAuthority: { type: Type.NUMBER },
                     pageRank: { type: Type.NUMBER },
                     toxicLinks: { type: Type.NUMBER },
-                    referringDomains: { type: Type.NUMBER }
+                    referringDomains: { type: Type.NUMBER },
+                    topReferringDomains: { type: Type.ARRAY, items: { type: Type.STRING } }
                   },
-                  required: ["domainAuthority", "pageRank", "toxicLinks", "referringDomains"]
+                  required: ["domainAuthority", "pageRank", "toxicLinks", "referringDomains", "topReferringDomains"]
                 }
               },
               required: ["url", "healthScore", "errors", "warnings", "notices", "technical", "onPage", "images", "content", "coreWebVitals", "authority"]

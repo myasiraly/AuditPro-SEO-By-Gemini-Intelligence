@@ -241,6 +241,7 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
               { label: 'Broken External Links', value: target.technical.brokenExternalLinks.count, status: target.technical.brokenExternalLinks.count > 0 ? 'warning' : 'success' },
             ]}
             details={getCombinedTechnicalDetails()}
+            suggestions={target.technical.suggestions}
           />
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -315,19 +316,43 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
       )}
 
       {activeTab === 'backlinks' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8">
-          <h3 className="text-xl font-bold mb-6">Backlink & Authority Profile</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <MetricCard title="Referring Domains" value={target.authority.referringDomains} color="blue" />
-            <MetricCard title="Page Rank" value={target.authority.pageRank} color="blue" />
-            <MetricCard title="Toxic Links" value={target.authority.toxicLinks} color="red" />
-            <MetricCard title="Domain Authority" value={target.authority.domainAuthority} color="green" />
-          </div>
-          <div className="p-4 bg-slate-800/50 rounded-xl border border-slate-700">
-            <p className="text-slate-300 text-sm leading-relaxed">
-              <span className="font-bold text-yellow-500 mr-2">Note:</span> 
-              Domain Authority and PageRank are simulated based on crawl analysis and public records via the Gemini API intelligence layer.
-            </p>
+        <div className="space-y-6">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8">
+            <h3 className="text-xl font-bold mb-6">Backlink & Authority Profile</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <MetricCard title="Referring Domains" value={target.authority.referringDomains} color="blue" />
+              <MetricCard title="Page Rank" value={target.authority.pageRank} color="blue" />
+              <MetricCard title="Toxic Links" value={target.authority.toxicLinks} color="red" />
+              <MetricCard title="Domain Authority" value={target.authority.domainAuthority} color="green" />
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="bg-slate-800/30 border border-slate-700 rounded-xl p-6">
+                <h4 className="text-lg font-semibold mb-4 text-blue-400">Top Referring Domains</h4>
+                <ul className="space-y-3">
+                  {target.authority.topReferringDomains.map((domain, i) => (
+                    <li key={i} className="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg border border-slate-800 transition-hover hover:border-blue-500/50">
+                      <div className="w-8 h-8 rounded bg-blue-500/10 flex items-center justify-center text-blue-500 text-xs font-bold">
+                        {domain[0].toUpperCase()}
+                      </div>
+                      <span className="text-sm font-mono text-slate-300">{domain}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-slate-800/30 border border-slate-700 rounded-xl p-6">
+                <h4 className="text-lg font-semibold mb-4 text-yellow-500">Authority Insights</h4>
+                <p className="text-slate-400 text-sm leading-relaxed mb-4">
+                  Referring domains represent the number of unique websites linking to yours. High-quality domains (DA 60+) contribute more significantly to your PageRank.
+                </p>
+                <div className="p-4 bg-yellow-500/5 border border-yellow-500/10 rounded-lg">
+                  <p className="text-xs text-yellow-200 italic">
+                    <span className="font-bold">Pro Tip:</span> Diversity of anchor text and top-level domains (TLDs) is key for a natural-looking backlink profile.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

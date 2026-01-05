@@ -11,9 +11,10 @@ interface AuditSectionProps {
   title: string;
   data: AuditCheck[];
   details?: string[];
+  suggestions?: string[];
 }
 
-const AuditSection: React.FC<AuditSectionProps> = ({ title, data, details }) => {
+const AuditSection: React.FC<AuditSectionProps> = ({ title, data, details, suggestions }) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
@@ -33,23 +34,41 @@ const AuditSection: React.FC<AuditSectionProps> = ({ title, data, details }) => 
         </div>
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-        <h3 className="text-lg font-semibold mb-4 text-slate-400">Findings & Logs</h3>
-        {details && details.length > 0 ? (
-          <ul className="space-y-3">
-            {details.map((log, i) => (
-              <li key={i} className="flex gap-3 text-sm text-slate-300 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                <span className="text-blue-500">•</span>
-                {log}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-slate-600 italic">
-            <svg className="w-12 h-12 mb-2 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            No major technical issues identified.
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col gap-6">
+        <div>
+          <h3 className="text-lg font-semibold mb-4 text-slate-400">Findings & Logs</h3>
+          {details && details.length > 0 ? (
+            <ul className="space-y-3">
+              {details.slice(0, 10).map((log, i) => (
+                <li key={i} className="flex gap-3 text-sm text-slate-300 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                  <span className="text-blue-500">•</span>
+                  {log}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-6 text-slate-600 italic">
+              No major technical issues identified.
+            </div>
+          )}
+        </div>
+
+        {suggestions && suggestions.length > 0 && (
+          <div className="mt-auto border-t border-slate-800 pt-6">
+            <h3 className="text-lg font-semibold mb-4 text-emerald-400 flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              AI Fix Suggestions
+            </h3>
+            <ul className="space-y-3">
+              {suggestions.map((sug, i) => (
+                <li key={i} className="flex gap-3 text-sm text-emerald-100 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                  <span className="text-emerald-500 font-bold">FIX</span>
+                  {sug}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </div>
