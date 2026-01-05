@@ -1,0 +1,7 @@
+{
+  "name": "AuditPro SEO Intelligence",
+  "description": "A comprehensive SEO analysis dashboard providing site health scores, technical audits, on-page analysis, Core Web Vitals, and AI-driven SWOT insights using Gemini.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
