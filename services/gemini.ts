@@ -11,30 +11,31 @@ export class GeminiService {
 
   async performSEOAudit(targetUrl: string, competitorUrl?: string): Promise<AuditResult> {
     const prompt = `
-      Act as a Senior SEO Expert and Developer. Perform a comprehensive SEO audit for the target site: ${targetUrl} 
-      ${competitorUrl ? `and compare it against its competitor: ${competitorUrl}.` : ''}
+      Act as a Senior SEO Expert and Technical Lead. Perform an exhaustive SEO audit for the target site: ${targetUrl} 
+      ${competitorUrl ? `and compare it against its main competitor: ${competitorUrl}.` : ''}
       
-      Simulate a deep crawl of the top 20 pages. 
-      Calculate Site Health using this formula: Health = 100 - (((Errors * 5) + (Warnings * 2) + (Notices * 0.5)) / TotalPages).
+      CRITICAL TECHNICAL AUDIT REQUIREMENT:
+      Identify and list specific technical failures:
+      1. Broken Internal Links: Links pointing to missing pages on the same domain (404s).
+      2. Broken External Links: Outbound links pointing to dead external resources.
+      3. Orphan Pages: Pages on the site that have zero incoming internal links from other pages on the same domain.
       
       Analyze and provide specific data for:
-      1. Technical: Redirect chains, robots.txt, HTTPS, mixed content. 
+      - Technical: Redirect chains, robots.txt, HTTPS status, mixed content resources. 
          - Mobile Friendliness: True/False.
-         - Performance Score: 0-100.
-         - Internal Linking: Specifically find orphan pages (pages with zero internal links) and broken links.
-         - Suggestions: Provide at least 3 actionable technical SEO fix suggestions.
-      2. On-Page: Missing/Duplicate titles, meta descriptions, H1s, Image alt tags, image sizes (>100kb).
-         - Keyword Optimization Score: 0-100 based on keyword placement in titles/H1s/meta.
-      3. Speed: Simulated PageSpeed metrics (LCP, FID, CLS, TTI).
-      4. Backlinks: Simulated Authority metrics and Toxic Link flagging.
-         - Top Referring Domains: Provide a list of 5 realistic domain names linking to this site.
-      5. Content: Word counts (thin content < 300 words), duplicate content detection.
-      6. SWOT Analysis: Strengths, Weaknesses, Opportunities, Threats.
+         - Performance Score: 0-100 scale.
+         - Broken Internal/External Links: Return counts and lists of URLs.
+         - Internal Linking Analysis: Identify specific Orphan Pages (count and list) and calculate an Internal Link Score (0-100).
+      - On-Page & Semantic: Missing/Duplicate meta tags, H1 usage, and Image Alt text.
+         - Keyword Optimization: Score 0-100.
+      - Authority: Domain Authority, Page Rank, and Toxic Link counts.
+         - Top 5 Referring Domains: List specific linking domains.
+      - SWOT Analysis: Actionable Strengths, Weaknesses, Opportunities, and Threats.
 
-      For the COMPETITOR (if provided), analyze the EXACT SAME fields as the target for comparison:
-      - Health Score, Core Web Vitals, Domain Authority, Performance Score, Mobile Friendliness, Keyword Optimization Score, and Top Referring Domains (5 examples).
+      COMPETITIVE BENCHMARKING (if competitor provided):
+      For the COMPETITOR, return the exact same broken link metrics AND Orphan Page metrics (count and lists), health score, and authority.
 
-      Ensure the data is realistic for the provided URLs.
+      The response MUST be strictly valid JSON according to the requested schema.
     `;
 
     const response = await this.ai.models.generateContent({
@@ -56,24 +57,21 @@ export class GeminiService {
                   properties: {
                     count: { type: Type.NUMBER },
                     details: { type: Type.ARRAY, items: { type: Type.STRING } }
-                  },
-                  required: ["count", "details"]
+                  }
                 },
                 warnings: {
                   type: Type.OBJECT,
                   properties: {
                     count: { type: Type.NUMBER },
                     details: { type: Type.ARRAY, items: { type: Type.STRING } }
-                  },
-                  required: ["count", "details"]
+                  }
                 },
                 notices: {
                   type: Type.OBJECT,
                   properties: {
                     count: { type: Type.NUMBER },
                     details: { type: Type.ARRAY, items: { type: Type.STRING } }
-                  },
-                  required: ["count", "details"]
+                  }
                 },
                 technical: {
                   type: Type.OBJECT,
@@ -91,16 +89,14 @@ export class GeminiService {
                       properties: {
                         count: { type: Type.NUMBER },
                         list: { type: Type.ARRAY, items: { type: Type.STRING } }
-                      },
-                      required: ["count", "list"]
+                      }
                     },
                     brokenExternalLinks: {
                       type: Type.OBJECT,
                       properties: {
                         count: { type: Type.NUMBER },
                         list: { type: Type.ARRAY, items: { type: Type.STRING } }
-                      },
-                      required: ["count", "list"]
+                      }
                     },
                     internalLinking: {
                       type: Type.OBJECT,
@@ -108,23 +104,9 @@ export class GeminiService {
                         orphanPagesCount: { type: Type.NUMBER },
                         orphanPagesList: { type: Type.ARRAY, items: { type: Type.STRING } },
                         internalLinkScore: { type: Type.NUMBER }
-                      },
-                      required: ["orphanPagesCount", "orphanPagesList", "internalLinkScore"]
+                      }
                     }
-                  },
-                  required: [
-                    "redirectChains", 
-                    "robotsTxtStatus", 
-                    "httpsSecurity", 
-                    "mixedContent", 
-                    "mixedContentUrls",
-                    "suggestions",
-                    "mobileFriendly",
-                    "performanceScore",
-                    "brokenInternalLinks", 
-                    "brokenExternalLinks",
-                    "internalLinking"
-                  ]
+                  }
                 },
                 onPage: {
                   type: Type.OBJECT,
@@ -134,16 +116,14 @@ export class GeminiService {
                     missingMetaDescriptions: { type: Type.NUMBER },
                     missingH1s: { type: Type.NUMBER },
                     keywordOptimizationScore: { type: Type.NUMBER }
-                  },
-                  required: ["missingTitles", "duplicateTitles", "missingMetaDescriptions", "missingH1s", "keywordOptimizationScore"]
+                  }
                 },
                 images: {
                   type: Type.OBJECT,
                   properties: {
                     overSizeLimit: { type: Type.NUMBER },
                     missingAlt: { type: Type.NUMBER }
-                  },
-                  required: ["overSizeLimit", "missingAlt"]
+                  }
                 },
                 content: {
                   type: Type.OBJECT,
@@ -151,8 +131,7 @@ export class GeminiService {
                     thinContentCount: { type: Type.NUMBER },
                     duplicateContentHashes: { type: Type.NUMBER },
                     avgWordCount: { type: Type.NUMBER }
-                  },
-                  required: ["thinContentCount", "duplicateContentHashes", "avgWordCount"]
+                  }
                 },
                 coreWebVitals: {
                   type: Type.OBJECT,
@@ -161,8 +140,7 @@ export class GeminiService {
                     fid: { type: Type.STRING },
                     cls: { type: Type.STRING },
                     tti: { type: Type.STRING }
-                  },
-                  required: ["lcp", "fid", "cls", "tti"]
+                  }
                 },
                 authority: {
                   type: Type.OBJECT,
@@ -172,22 +150,43 @@ export class GeminiService {
                     toxicLinks: { type: Type.NUMBER },
                     referringDomains: { type: Type.NUMBER },
                     topReferringDomains: { type: Type.ARRAY, items: { type: Type.STRING } }
-                  },
-                  required: ["domainAuthority", "pageRank", "toxicLinks", "referringDomains", "topReferringDomains"]
+                  }
                 }
               },
-              required: ["url", "healthScore", "errors", "warnings", "notices", "technical", "onPage", "images", "content", "coreWebVitals", "authority"]
+              required: ["url", "healthScore", "technical", "onPage", "authority"]
             },
             competitor: {
               type: Type.OBJECT,
               properties: {
                 url: { type: Type.STRING },
                 healthScore: { type: Type.NUMBER },
-                coreWebVitals: {
-                  type: Type.OBJECT,
-                  properties: {
-                    tti: { type: Type.STRING }
-                  }
+                technical: {
+                    type: Type.OBJECT,
+                    properties: {
+                        performanceScore: { type: Type.NUMBER },
+                        mobileFriendly: { type: Type.BOOLEAN },
+                        brokenInternalLinks: {
+                          type: Type.OBJECT,
+                          properties: {
+                            count: { type: Type.NUMBER },
+                            list: { type: Type.ARRAY, items: { type: Type.STRING } }
+                          }
+                        },
+                        brokenExternalLinks: {
+                          type: Type.OBJECT,
+                          properties: {
+                            count: { type: Type.NUMBER },
+                            list: { type: Type.ARRAY, items: { type: Type.STRING } }
+                          }
+                        },
+                        internalLinking: {
+                          type: Type.OBJECT,
+                          properties: {
+                            orphanPagesCount: { type: Type.NUMBER },
+                            orphanPagesList: { type: Type.ARRAY, items: { type: Type.STRING } }
+                          }
+                        }
+                    }
                 },
                 authority: {
                   type: Type.OBJECT,
@@ -196,13 +195,6 @@ export class GeminiService {
                     referringDomains: { type: Type.NUMBER },
                     topReferringDomains: { type: Type.ARRAY, items: { type: Type.STRING } }
                   }
-                },
-                technical: {
-                    type: Type.OBJECT,
-                    properties: {
-                        performanceScore: { type: Type.NUMBER },
-                        mobileFriendly: { type: Type.BOOLEAN }
-                    }
                 },
                 onPage: {
                     type: Type.OBJECT,
@@ -232,26 +224,7 @@ export class GeminiService {
   }
 
   async generateBlogContentPlan(audit: AuditResult): Promise<ContentPlan> {
-    const prompt = `
-      Based on the following SEO Audit Results for ${audit.target.url}:
-      Strengths: ${audit.swot.strengths.join(', ')}
-      Opportunities: ${audit.swot.opportunities.join(', ')}
-      Weaknesses: ${audit.swot.weaknesses.join(', ')}
-
-      Create a 30-day Blog Content Strategy. 
-      The goal is to fix content gaps (weaknesses) and capitalize on opportunities.
-      
-      For each suggested post, provide:
-      1. day: The suggested day (1-30).
-      2. title: SEO-optimized title.
-      3. outline: Brief outline.
-      4. funnelStage: 'TOFU', 'MOFU', or 'BOFU'.
-      5. targetKeywords: 3 target SEO keywords.
-      6. suggestedWordCount: Recommended length.
-
-      Also provide a strategySummary explaining how this plan addresses the site's current SEO standing.
-    `;
-
+    const prompt = `Based on the SEO audit for ${audit.target.url}, create a 30-day blog content plan to fix weaknesses and capture opportunities. Return JSON.`;
     const response = await this.ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
@@ -272,36 +245,22 @@ export class GeminiService {
                   funnelStage: { type: Type.STRING, enum: ['TOFU', 'MOFU', 'BOFU'] },
                   targetKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
                   suggestedWordCount: { type: Type.NUMBER }
-                },
-                required: ["day", "title", "outline", "funnelStage", "targetKeywords", "suggestedWordCount"]
+                }
               }
             }
-          },
-          required: ["strategySummary", "posts"]
+          }
         }
       }
     });
-
     return JSON.parse(response.text);
   }
 
   async writeFullBlog(post: BlogPost): Promise<string> {
-    const prompt = `
-      Write a professional, high-quality, SEO-optimized blog post based on these details:
-      Title: ${post.title}
-      Outline: ${post.outline}
-      Target Keywords: ${post.targetKeywords.join(', ')}
-      Funnel Stage: ${post.funnelStage}
-      Recommended Word Count: ~${post.suggestedWordCount}
-
-      Structure with clear headings, introduction, conclusion, and CTA. Use Markdown.
-    `;
-
+    const prompt = `Write a professional blog post for: ${post.title}. Use Markdown.`;
     const response = await this.ai.models.generateContent({
       model: "gemini-3-pro-preview",
       contents: prompt,
     });
-
     return response.text || "Failed to generate blog content.";
   }
 }
