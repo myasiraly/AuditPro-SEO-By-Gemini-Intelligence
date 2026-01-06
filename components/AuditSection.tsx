@@ -17,16 +17,16 @@ interface AuditSectionProps {
 const AuditSection: React.FC<AuditSectionProps> = ({ title, data, details, suggestions }) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-        <div className="p-6 border-b border-slate-800 bg-slate-800/20">
-          <h3 className="text-xl font-bold">{title}</h3>
+      <div className="bg-slate-900/50 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
+        <div className="p-8 border-b border-white/5 bg-white/[0.02]">
+          <h3 className="text-xl font-bold font-display tracking-tight text-white">{title}</h3>
         </div>
-        <div className="divide-y divide-slate-800">
+        <div className="divide-y divide-white/5">
           {data.map((item, i) => (
-            <div key={i} className="flex items-center justify-between p-4 hover:bg-slate-800/30 transition-colors">
-              <span className="text-slate-300 font-medium">{item.label}</span>
-              <div className="flex items-center gap-3">
-                <span className="text-slate-200 font-mono text-sm">{item.value}</span>
+            <div key={i} className="flex items-center justify-between p-5 hover:bg-white/[0.02] transition-colors group">
+              <span className="text-slate-400 font-bold text-sm tracking-tight group-hover:text-slate-200">{item.label}</span>
+              <div className="flex items-center gap-5">
+                <span className="text-slate-300 font-mono text-[11px] font-bold">{item.value}</span>
                 <StatusBadge status={item.status} />
               </div>
             </div>
@@ -34,37 +34,37 @@ const AuditSection: React.FC<AuditSectionProps> = ({ title, data, details, sugge
         </div>
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col gap-6">
+      <div className="bg-slate-900/50 border border-white/5 rounded-3xl p-8 flex flex-col gap-8 backdrop-blur-sm">
         <div>
-          <h3 className="text-lg font-semibold mb-4 text-slate-400">Findings & Logs</h3>
+          <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest-label mb-6">Technical Discovery Logs</h3>
           {details && details.length > 0 ? (
             <ul className="space-y-3">
-              {details.slice(0, 10).map((log, i) => (
-                <li key={i} className="flex gap-3 text-sm text-slate-300 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                  <span className="text-blue-500">•</span>
+              {details.slice(0, 8).map((log, i) => (
+                <li key={i} className="flex gap-4 text-[12px] text-slate-400 p-4 bg-slate-900/80 rounded-2xl border border-white/5 font-medium leading-relaxed group hover:border-blue-500/20 transition-all">
+                  <span className="text-blue-500 font-black">LOG</span>
                   {log}
                 </li>
               ))}
             </ul>
           ) : (
-            <div className="flex flex-col items-center justify-center py-6 text-slate-600 italic">
-              No major technical issues identified.
+            <div className="flex flex-col items-center justify-center py-12 text-slate-600 italic font-medium">
+              No critical system logs recorded.
             </div>
           )}
         </div>
 
         {suggestions && suggestions.length > 0 && (
-          <div className="mt-auto border-t border-slate-800 pt-6">
-            <h3 className="text-lg font-semibold mb-4 text-emerald-400 flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          <div className="mt-auto pt-8 border-t border-white/5">
+            <h3 className="text-xs font-black mb-6 text-emerald-400 flex items-center gap-2 uppercase tracking-widest-label">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              AI Fix Suggestions
+              Intelligence Fix Recommendation
             </h3>
             <ul className="space-y-3">
               {suggestions.map((sug, i) => (
-                <li key={i} className="flex gap-3 text-sm text-emerald-100 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
-                  <span className="text-emerald-500 font-bold">FIX</span>
+                <li key={i} className="flex gap-4 text-sm text-emerald-100/90 p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10 font-bold leading-relaxed shadow-sm">
+                  <span className="text-emerald-500 uppercase font-black text-[9px] tracking-widest-label mt-1">Fix</span>
                   {sug}
                 </li>
               ))}
@@ -78,12 +78,12 @@ const AuditSection: React.FC<AuditSectionProps> = ({ title, data, details, sugge
 
 const StatusBadge: React.FC<{ status: 'success' | 'warning' | 'error' }> = ({ status }) => {
   const styles = {
-    success: 'bg-green-500/10 text-green-400 border-green-500/20',
-    warning: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-    error: 'bg-red-500/10 text-red-400 border-red-500/20',
+    success: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    warning: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    error: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
   };
   return (
-    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${styles[status]}`}>
+    <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest-label border ${styles[status]}`}>
       {status}
     </span>
   );

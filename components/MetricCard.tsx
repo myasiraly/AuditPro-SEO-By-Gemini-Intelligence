@@ -15,29 +15,29 @@ interface MetricCardProps {
 
 const MetricCard: React.FC<MetricCardProps> = ({ title, value, subtitle, color = 'slate', comparison }) => {
   const colors = {
-    green: 'border-green-500/50 bg-green-500/5 text-green-500',
-    red: 'border-red-500/50 bg-red-500/5 text-red-500',
-    yellow: 'border-yellow-500/50 bg-yellow-500/5 text-yellow-500',
-    blue: 'border-blue-500/50 bg-blue-500/5 text-blue-500',
-    slate: 'border-slate-800 bg-slate-900/50 text-slate-200',
+    green: 'border-green-500/30 bg-green-500/[0.03] text-green-400',
+    red: 'border-red-500/30 bg-red-500/[0.03] text-red-400',
+    yellow: 'border-yellow-500/30 bg-yellow-500/[0.03] text-yellow-400',
+    blue: 'border-blue-500/30 bg-blue-500/[0.03] text-blue-400',
+    slate: 'border-white/5 bg-slate-900/50 text-slate-100',
   };
 
   return (
-    <div className={`p-6 rounded-2xl border ${colors[color]} transition-all hover:scale-[1.02] duration-300`}>
-      <h4 className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">{title}</h4>
+    <div className={`p-7 rounded-[32px] border ${colors[color]} transition-all hover:translate-y-[-4px] duration-500 backdrop-blur-sm group`}>
+      <h4 className="text-slate-500 text-[10px] font-black uppercase tracking-widest-label mb-3">{title}</h4>
       <div className="flex items-baseline gap-2">
-        <span className="text-3xl font-bold">{value}</span>
+        <span className="text-4xl font-extrabold font-display tracking-tight-data group-hover:text-white transition-colors">{value}</span>
       </div>
-      {subtitle && <p className="text-slate-500 text-xs mt-1">{subtitle}</p>}
+      {subtitle && <p className="text-slate-500 text-[11px] mt-2 font-bold tracking-tight uppercase opacity-80">{subtitle}</p>}
       
       {comparison && (
-        <div className="mt-4 pt-4 border-t border-slate-800/50 flex justify-between items-center">
-          <div className="text-[10px] text-slate-500 uppercase tracking-tighter">{comparison.label}</div>
-          <div className="flex items-center gap-1">
-            <span className="text-sm font-semibold text-slate-300">{comparison.value}</span>
+        <div className="mt-5 pt-5 border-t border-white/5 flex justify-between items-center">
+          <div className="text-[9px] text-slate-600 uppercase font-black tracking-widest-label">{comparison.label}</div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-black text-slate-300 font-display">{comparison.value}</span>
             {comparison.trend && (
               <svg 
-                className={`w-4 h-4 ${comparison.trend === 'up' ? 'text-green-500' : 'text-red-500'}`} 
+                className={`w-3.5 h-3.5 ${comparison.trend === 'up' ? 'text-emerald-500' : 'text-rose-500'}`} 
                 fill="none" viewBox="0 0 24 24" stroke="currentColor"
               >
                 <path 

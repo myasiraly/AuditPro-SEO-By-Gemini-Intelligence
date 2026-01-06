@@ -31,75 +31,97 @@ const App: React.FC = () => {
   }, [targetUrl, competitorUrl]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-body">
       {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-white/5 bg-slate-900/40 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="bg-blue-600 p-2 rounded-lg">
+          <div className="flex items-center gap-3">
+            <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-2 rounded-xl shadow-lg shadow-blue-500/20">
               <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <h1 className="text-xl font-bold tracking-tight">AuditPro <span className="text-blue-500">SEO</span></h1>
+            <h1 className="text-xl font-extrabold tracking-tight font-display">AuditPro <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">SEO</span></h1>
           </div>
-          <div className="text-sm text-slate-400">Powered by Gemini Intelligence</div>
+          <div className="hidden sm:block text-[10px] font-bold uppercase tracking-widest-label text-slate-500">
+            Intelligence Platform <span className="text-slate-700 ml-2">•</span> <span className="text-blue-500/80 ml-2">Yasir Ali</span>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12">
         {!result && !isLoading && (
-          <div className="max-w-2xl mx-auto mt-20 text-center">
-            <h2 className="text-4xl font-extrabold mb-4 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-              Deep SEO Intelligence at Your Fingertips
+          <div className="max-w-3xl mx-auto mt-16 text-center animate-in fade-in slide-in-from-top-4 duration-1000">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest-label mb-6">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+              </span>
+              Next-Gen Search Engine Intelligence
+            </div>
+            <h2 className="text-5xl md:text-6xl font-extrabold mb-6 font-display tracking-tight text-white">
+              Smarter SEO, <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-emerald-400">Better Rankings.</span>
             </h2>
-            <p className="text-slate-400 text-lg mb-8">
-              Audit your site's health, analyze technical performance, and crush your competition with AI-powered SWOT insights.
+            <p className="text-slate-400 text-lg mb-10 leading-relaxed max-w-2xl mx-auto font-medium">
+              Audit your site's health, analyze technical performance, write the SEO-optimized blogs for FREE, and crush your competition with AI-powered SWOT insights.
             </p>
             
-            <form onSubmit={handleAudit} className="space-y-4">
+            <form onSubmit={handleAudit} className="space-y-4 max-w-xl mx-auto">
               <div className="relative group">
-                <div className="absolute inset-0 bg-blue-500 rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
                 <input
                   type="url"
                   placeholder="Enter Target URL (e.g., https://example.com)"
-                  className="relative w-full bg-slate-900 border border-slate-700 rounded-xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-lg"
+                  className="relative w-full bg-slate-900 border border-white/10 rounded-2xl px-6 py-5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-lg font-medium placeholder:text-slate-600"
                   value={targetUrl}
                   onChange={(e) => setTargetUrl(e.target.value)}
                   required
                 />
               </div>
-              <input
-                type="url"
-                placeholder="Competitor URL (Optional)"
-                className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl px-6 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                value={competitorUrl}
-                onChange={(e) => setCompetitorUrl(e.target.value)}
-              />
+              <div className="relative group">
+                <input
+                  type="url"
+                  placeholder="Competitor URL (Optional)"
+                  className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all font-medium placeholder:text-slate-700"
+                  value={competitorUrl}
+                  onChange={(e) => setCompetitorUrl(e.target.value)}
+                />
+              </div>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-800 disabled:text-slate-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98]"
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-white font-extrabold py-5 rounded-2xl transition-all shadow-xl shadow-blue-500/10 active:scale-[0.98] font-display text-lg tracking-wide"
               >
-                {isLoading ? 'Analyzing Site Integrity...' : 'Launch SEO Audit'}
+                {isLoading ? 'Synthesizing Audit Data...' : 'Launch Intelligence Scan'}
               </button>
             </form>
-            {error && <p className="mt-4 text-red-500 text-sm">{error}</p>}
+            {error && <p className="mt-6 text-red-500 font-medium text-sm flex items-center justify-center gap-2">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              {error}
+            </p>}
           </div>
         )}
 
         {isLoading && (
-          <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
-            <div className="relative">
-              <div className="w-24 h-24 border-4 border-blue-500/20 rounded-full animate-ping"></div>
+          <div className="flex flex-col items-center justify-center min-h-[60vh] gap-8">
+            <div className="relative h-32 w-32">
+              <div className="absolute inset-0 border-4 border-blue-500/10 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+              <div className="absolute inset-4 border-4 border-indigo-500/10 rounded-full"></div>
+              <div className="absolute inset-4 border-4 border-b-indigo-500 border-r-transparent border-t-transparent border-l-transparent rounded-full animate-[spin_1.5s_linear_infinite_reverse]"></div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-16 h-16 border-4 border-t-blue-500 border-r-transparent border-b-blue-500 border-l-transparent rounded-full animate-spin"></div>
+                 <svg className="w-8 h-8 text-blue-500/50 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                 </svg>
               </div>
             </div>
             <div className="text-center">
-              <p className="text-xl font-medium text-slate-200 animate-pulse">Scanning URL Structure...</p>
-              <p className="text-sm text-slate-500 mt-2">Checking technical headers, meta tags, and content depth</p>
+              <p className="text-2xl font-bold font-display text-white tracking-tight animate-pulse">Analyzing Site Ecosystem...</p>
+              <p className="text-slate-500 mt-3 font-medium">Checking technical headers, semantic structure, and market positioning</p>
             </div>
           </div>
         )}
@@ -117,9 +139,16 @@ const App: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="py-8 border-t border-slate-900">
-        <div className="max-w-7xl mx-auto px-4 text-center text-slate-500 text-sm">
-          &copy; {new Date().getFullYear()} AuditPro SEO. All data is generated using the Gemini Large Language Model.
+      <footer className="py-12 border-t border-white/5 bg-slate-900/20 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-slate-500 text-sm font-medium">
+            &copy; {new Date().getFullYear()} AuditPro SEO Intelligence. Powered by Gemini Pro.
+          </p>
+          <div className="mt-4 flex items-center justify-center gap-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-800"></span>
+            <span className="text-[10px] font-bold uppercase tracking-widest-label text-slate-700">Confidential Audit Report</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-800"></span>
+          </div>
         </div>
       </footer>
     </div>
