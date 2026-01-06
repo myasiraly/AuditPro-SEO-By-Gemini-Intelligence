@@ -43,7 +43,7 @@ const App: React.FC = () => {
             </div>
             <h1 className="text-xl font-bold tracking-tight">AuditPro <span className="text-blue-500">SEO</span></h1>
           </div>
-          <div className="text-sm text-slate-400">Powered by Gemini Intelligence (Yasir Ali)</div>
+          <div className="text-sm text-slate-400">Powered by Gemini Intelligence</div>
         </div>
       </header>
 
@@ -119,7 +119,7 @@ const App: React.FC = () => {
       {/* Footer */}
       <footer className="py-8 border-t border-slate-900">
         <div className="max-w-7xl mx-auto px-4 text-center text-slate-500 text-sm">
-          &copy; {new Date().getFullYear()} AuditPro SEO.
+          &copy; {new Date().getFullYear()} AuditPro SEO. All data is generated using the Gemini Large Language Model.
         </div>
       </footer>
     </div>
