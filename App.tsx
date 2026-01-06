@@ -1,15 +1,52 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { GeminiService } from './services/gemini';
 import { AuditResult } from './types';
 import Dashboard from './components/Dashboard';
+import Auth from './components/Auth';
+import { auth, onAuthStateChanged, signOut } from './firebase';
+
+interface User {
+  email: string | null;
+  name: string | null;
+  avatar: string | null;
+}
 
 const App: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [targetUrl, setTargetUrl] = useState('');
   const [competitorUrl, setCompetitorUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<AuditResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Firebase Auth Listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser({
+          email: firebaseUser.email,
+          name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+          avatar: firebaseUser.photoURL,
+        });
+      } else {
+        setUser(null);
+      }
+      setIsInitializing(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setResult(null);
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
+  };
 
   const handleAudit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +67,18 @@ const App: React.FC = () => {
     }
   }, [targetUrl, competitorUrl]);
 
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-body">
       {/* Header */}
@@ -43,8 +92,23 @@ const App: React.FC = () => {
             </div>
             <h1 className="text-xl font-extrabold tracking-tight font-display">AuditPro <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">SEO</span></h1>
           </div>
-          <div className="hidden sm:block text-[10px] font-bold uppercase tracking-widest-label text-slate-500">
-            Intelligence Platform <span className="text-slate-700 ml-2">•</span> <span className="text-blue-500/80 ml-2">Yasir Ali</span>
+          
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5">
+              <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-black uppercase overflow-hidden">
+                {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : user.name?.[0]}
+              </div>
+              <span className="text-xs font-bold text-slate-300">{user.name}</span>
+            </div>
+            <button 
+              onClick={handleLogout}
+              className="p-2 hover:bg-rose-500/10 hover:text-rose-400 text-slate-500 rounded-xl transition-all"
+              title="Logout"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
           </div>
         </div>
       </header>
@@ -58,11 +122,11 @@ const App: React.FC = () => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
               </span>
-              Next-Gen Search Engine Intelligence
+              Verified Professional Access
             </div>
             <h2 className="text-5xl md:text-6xl font-extrabold mb-6 font-display tracking-tight text-white">
-              Smarter SEO, <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-emerald-400">Better Rankings.</span>
+              Welcome back, <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-emerald-400 capitalize">{user.name}.</span>
             </h2>
             <p className="text-slate-400 text-lg mb-10 leading-relaxed max-w-2xl mx-auto font-medium">
               Audit your site's health, analyze technical performance, write the SEO-optimized blogs for FREE, and crush your competition with AI-powered SWOT insights.
