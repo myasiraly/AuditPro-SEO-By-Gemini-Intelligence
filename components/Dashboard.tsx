@@ -42,16 +42,12 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
       ['Metric', 'Target Value'],
       ['URL', target.url],
       ['Health Score', target.healthScore.toFixed(2)],
-      ['Total Pages', target.totalPages],
-      ['Errors', target.errors.count],
-      ['Warnings', target.warnings.count],
-      ['Notices', target.notices.count],
-      ['Domain Authority', target.authority.domainAuthority],
-      ['LCP', target.coreWebVitals.lcp],
-      ['TTI', target.coreWebVitals.tti],
+      ['Performance Score', target.technical.performanceScore],
+      ['Mobile Friendly', target.technical.mobileFriendly ? 'Yes' : 'No'],
+      ['Keyword Optimization', target.onPage.keywordOptimizationScore],
       ['Broken Internal Links', target.technical.brokenInternalLinks.count],
       ['Broken External Links', target.technical.brokenExternalLinks.count],
-      ['Mixed Content Count', target.technical.mixedContentUrls.length],
+      ['Orphan Pages', target.technical.internalLinking.orphanPagesCount],
     ];
     const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
     const encodedUri = encodeURI(csvContent);
@@ -68,17 +64,19 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
     target.technical.brokenInternalLinks.list.forEach(url => 
       details.push(`Broken Internal (404): ${url}`)
     );
-    
+
     target.technical.brokenExternalLinks.list.forEach(url => 
       details.push(`Broken External (404): ${url}`)
+    );
+    
+    target.technical.internalLinking.orphanPagesList.forEach(url => 
+      details.push(`Orphan Page (No incoming links): ${url}`)
     );
 
     if (target.technical.mixedContentUrls.length > 0) {
       target.technical.mixedContentUrls.forEach(url => {
         details.push(`Mixed Content Resource (HTTP): ${url}`);
       });
-    } else if (target.technical.mixedContent) {
-      details.push(`Insecure content detected on page (Mixed Content)`);
     }
 
     return details;
@@ -143,29 +141,33 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                 } : undefined}
               />
               <MetricCard 
+                title="Performance" 
+                value={`${target.technical.performanceScore}/100`}
+                subtitle="PageSpeed Score"
+                color={target.technical.performanceScore > 85 ? 'green' : 'yellow'}
+                comparison={competitor?.technical ? { 
+                  value: `${competitor.technical.performanceScore}/100`, 
+                  label: 'Competitor'
+                } : undefined}
+              />
+              <MetricCard 
                 title="Domain Authority" 
                 value={target.authority.domainAuthority}
-                subtitle="OpenPageRank Score"
+                subtitle="DA Rank"
                 color="blue"
                 comparison={competitor ? { 
                   value: competitor.authority.domainAuthority, 
                   label: 'Competitor'
                 } : undefined}
               />
-              <MetricCard 
-                title="Toxic Links" 
-                value={target.authority.toxicLinks}
-                subtitle="Potential Spam Links"
-                color={target.authority.toxicLinks > 5 ? 'red' : 'green'}
-              />
             </div>
 
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-                <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <h3 className="text-lg font-semibold mb-6 flex items-center gap-2 text-blue-400">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
-                Health Comparison
+                Site Health Benchmarking
               </h3>
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -190,37 +192,40 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
 
           <div className="space-y-6">
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold mb-4">Core Web Vitals</h3>
+              <h3 className="text-lg font-semibold mb-4 text-emerald-400">Technical Vitals</h3>
               <div className="space-y-4">
-                <VitalRow label="LCP" value={target.coreWebVitals.lcp} />
-                <VitalRow label="FID" value={target.coreWebVitals.fid} />
-                <VitalRow label="CLS" value={target.coreWebVitals.cls} />
-                <VitalRow label="TTI" value={target.coreWebVitals.tti} highlight />
-                {competitor && (
+                <VitalRow label="Mobile Friendly" value={target.technical.mobileFriendly ? 'Pass' : 'Fail'} highlight={target.technical.mobileFriendly} />
+                <VitalRow label="Internal Linking" value={`${target.technical.internalLinking.internalLinkScore}/100`} />
+                <VitalRow label="Orphan Pages" value={target.technical.internalLinking.orphanPagesCount.toString()} />
+                {competitor?.technical && (
                   <div className="pt-4 border-t border-slate-800">
                     <p className="text-xs text-slate-500 mb-2 uppercase tracking-wider">vs Competitor</p>
-                    <VitalRow label="TTI" value={competitor.coreWebVitals.tti} />
+                    <VitalRow label="Mobile Friendly" value={competitor.technical.mobileFriendly ? 'Pass' : 'Fail'} />
                   </div>
                 )}
               </div>
             </div>
 
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold mb-4">Content Intelligence</h3>
+              <h3 className="text-lg font-semibold mb-4 text-blue-400">SEO Strategy Stats</h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-400 text-sm">Thin Content Pages</span>
-                  <span className={`font-bold ${target.content.thinContentCount > 0 ? 'text-red-400' : 'text-green-400'}`}>
-                    {target.content.thinContentCount}
+                  <span className="text-slate-400 text-sm">Keyword Optimization</span>
+                  <span className={`font-bold ${target.onPage.keywordOptimizationScore > 70 ? 'text-green-400' : 'text-yellow-400'}`}>
+                    {target.onPage.keywordOptimizationScore}%
                   </span>
                 </div>
+                {competitor?.onPage && (
+                  <div className="flex justify-between items-center text-xs opacity-60">
+                    <span className="text-slate-500">Competitor Keyword Score</span>
+                    <span className="text-slate-300">{competitor.onPage.keywordOptimizationScore}%</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-400 text-sm">Duplicate Content</span>
-                  <span className="font-bold text-slate-200">{target.content.duplicateContentHashes} groups</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-400 text-sm">Avg. Word Count</span>
-                  <span className="font-bold text-slate-200">{target.content.avgWordCount}</span>
+                  <span className="text-slate-400 text-sm">Toxic Links</span>
+                  <span className={`font-bold ${target.authority.toxicLinks > 10 ? 'text-red-400' : 'text-green-400'}`}>
+                    {target.authority.toxicLinks}
+                  </span>
                 </div>
               </div>
             </div>
@@ -231,104 +236,159 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
       {activeTab === 'technical' && (
         <div className="space-y-6">
           <AuditSection 
-            title="Technical Audit" 
+            title="Deep Technical Audit" 
             data={[
               { label: 'Redirect Chains', value: target.technical.redirectChains, status: target.technical.redirectChains > 0 ? 'warning' : 'success' },
-              { label: 'Robots.txt', value: target.technical.robotsTxtStatus, status: target.technical.robotsTxtStatus.toLowerCase().includes('ok') ? 'success' : 'error' },
-              { label: 'HTTPS Security', value: target.technical.httpsSecurity, status: 'success' },
-              { label: 'Mixed Content', value: target.technical.mixedContent ? 'Found' : 'Clean', status: target.technical.mixedContent ? 'error' : 'success' },
+              { label: 'robots.txt Status', value: target.technical.robotsTxtStatus, status: target.technical.robotsTxtStatus.toLowerCase().includes('ok') ? 'success' : 'error' },
+              { label: 'HTTPS Security', value: target.technical.httpsSecurity, status: target.technical.httpsSecurity.toLowerCase().includes('yes') || target.technical.httpsSecurity.toLowerCase().includes('secure') ? 'success' : 'warning' },
+              { label: 'Mixed Content', value: target.technical.mixedContent ? 'Detected' : 'Clean', status: target.technical.mixedContent ? 'error' : 'success' },
+              { label: 'Mobile Optimization', value: target.technical.mobileFriendly ? 'Ready' : 'Issues', status: target.technical.mobileFriendly ? 'success' : 'error' },
               { label: 'Broken Internal Links', value: target.technical.brokenInternalLinks.count, status: target.technical.brokenInternalLinks.count > 0 ? 'error' : 'success' },
-              { label: 'Broken External Links', value: target.technical.brokenExternalLinks.count, status: target.technical.brokenExternalLinks.count > 0 ? 'warning' : 'success' },
+              { label: 'Broken External Links', value: target.technical.brokenExternalLinks.count, status: target.technical.brokenExternalLinks.count > 0 ? 'error' : 'success' },
+              { label: 'Orphan Pages', value: target.technical.internalLinking.orphanPagesCount, status: target.technical.internalLinking.orphanPagesCount > 0 ? 'warning' : 'success' },
             ]}
             details={getCombinedTechnicalDetails()}
             suggestions={target.technical.suggestions}
           />
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {(target.technical.brokenInternalLinks.count > 0 || target.technical.brokenExternalLinks.count > 0) && (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                <h3 className="text-xl font-bold mb-4 text-red-400 flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Broken Link Report
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">Internal 404s</h4>
-                    <ul className="space-y-1">
-                      {target.technical.brokenInternalLinks.list.length > 0 ? target.technical.brokenInternalLinks.list.map((url, i) => (
-                        <li key={i} className="text-[10px] font-mono text-red-300 bg-red-500/10 p-1.5 rounded truncate hover:whitespace-normal transition-all" title={url}>{url}</li>
-                      )) : <li className="text-xs text-slate-500 italic">None found</li>}
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">External 404s</h4>
-                    <ul className="space-y-1">
-                      {target.technical.brokenExternalLinks.list.length > 0 ? target.technical.brokenExternalLinks.list.map((url, i) => (
-                        <li key={i} className="text-[10px] font-mono text-orange-300 bg-orange-500/10 p-1.5 rounded truncate hover:whitespace-normal transition-all" title={url}>{url}</li>
-                      )) : <li className="text-xs text-slate-500 italic">None found</li>}
-                    </ul>
-                  </div>
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+              <h3 className="text-xl font-bold mb-4 text-blue-400">Benchmarking Comparison</h3>
+              <div className="space-y-6">
+                {/* Speed Comparison */}
+                <div>
+                   <h4 className="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">Site Speed (Performance)</h4>
+                   <div className="space-y-3">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-slate-300">Target</span>
+                          <span className="font-bold text-slate-100">{target.technical.performanceScore}/100</span>
+                        </div>
+                        <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                           <div className="bg-blue-500 h-full" style={{ width: `${target.technical.performanceScore}%` }}></div>
+                        </div>
+                      </div>
+                      {competitor?.technical && (
+                        <div className="flex flex-col gap-1">
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className="text-slate-500">Competitor</span>
+                            <span className="font-bold text-slate-400">{competitor.technical.performanceScore}/100</span>
+                          </div>
+                          <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                             <div className="bg-red-500/40 h-full" style={{ width: `${competitor.technical.performanceScore}%` }}></div>
+                          </div>
+                        </div>
+                      )}
+                   </div>
+                </div>
+
+                {/* Mobile Comparison */}
+                <div>
+                   <h4 className="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">Mobile-Friendliness</h4>
+                   <div className="grid grid-cols-2 gap-4">
+                      <div className={`p-3 rounded-lg border flex flex-col items-center justify-center ${target.technical.mobileFriendly ? 'bg-green-500/5 border-green-500/20' : 'bg-red-500/5 border-red-500/20'}`}>
+                        <span className="text-[10px] text-slate-500 mb-1">TARGET</span>
+                        <span className={`text-sm font-bold ${target.technical.mobileFriendly ? 'text-green-400' : 'text-red-400'}`}>
+                          {target.technical.mobileFriendly ? 'Optimized' : 'Not Optimized'}
+                        </span>
+                      </div>
+                      {competitor?.technical && (
+                        <div className={`p-3 rounded-lg border flex flex-col items-center justify-center ${competitor.technical.mobileFriendly ? 'bg-green-500/5 border-green-500/20' : 'bg-red-500/5 border-red-500/20'}`}>
+                          <span className="text-[10px] text-slate-500 mb-1">COMPETITOR</span>
+                          <span className={`text-sm font-bold ${competitor.technical.mobileFriendly ? 'text-green-400' : 'text-red-400'}`}>
+                            {competitor.technical.mobileFriendly ? 'Optimized' : 'Not Optimized'}
+                          </span>
+                        </div>
+                      )}
+                   </div>
                 </div>
               </div>
-            )}
+            </div>
 
-            {target.technical.mixedContent && (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                <h3 className="text-xl font-bold mb-4 text-yellow-400 flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                  Insecure Resource Audit
-                </h3>
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+              <h3 className="text-xl font-bold mb-4 text-emerald-400">Link & Structural Integrity</h3>
+              <div className="space-y-4">
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">Mixed Content Resource URLs (HTTP)</h4>
-                  <ul className="space-y-2">
-                    {target.technical.mixedContentUrls.length > 0 ? target.technical.mixedContentUrls.map((url, i) => (
-                      <li key={i} className="flex flex-col gap-1 p-2 bg-yellow-500/5 border border-yellow-500/10 rounded">
-                        <span className="text-[10px] font-mono text-yellow-300 break-all">{url}</span>
-                        <span className="text-[8px] uppercase tracking-tighter text-slate-500">Resource: {url.split('.').pop()?.toUpperCase() || 'UNKNOWN'}</span>
-                      </li>
-                    )) : (
-                      <li className="text-xs text-slate-500 italic">No specific resource URLs captured, but insecure requests were detected.</li>
-                    )}
+                  <h4 className="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">Orphan Pages (Isolated)</h4>
+                  <ul className="space-y-1">
+                    {target.technical.internalLinking.orphanPagesList.length > 0 ? target.technical.internalLinking.orphanPagesList.map((url, i) => (
+                      <li key={i} className="text-[10px] font-mono text-yellow-300 bg-yellow-500/10 p-1.5 rounded truncate" title={url}>{url}</li>
+                    )) : <li className="text-xs text-slate-500 italic">No orphan pages found.</li>}
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">Internal Broken Links (404)</h4>
+                  <ul className="space-y-1">
+                    {target.technical.brokenInternalLinks.list.length > 0 ? target.technical.brokenInternalLinks.list.map((url, i) => (
+                      <li key={i} className="text-[10px] font-mono text-red-300 bg-red-500/10 p-1.5 rounded truncate" title={url}>{url}</li>
+                    )) : <li className="text-xs text-slate-500 italic">All internal links are active.</li>}
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">External Broken Links (404)</h4>
+                  <ul className="space-y-1">
+                    {target.technical.brokenExternalLinks.list.length > 0 ? target.technical.brokenExternalLinks.list.map((url, i) => (
+                      <li key={i} className="text-[10px] font-mono text-orange-300 bg-orange-500/10 p-1.5 rounded truncate" title={url}>{url}</li>
+                    )) : <li className="text-xs text-slate-500 italic">All outbound links are healthy.</li>}
                   </ul>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       )}
 
       {activeTab === 'onpage' && (
-        <AuditSection 
-          title="On-Page SEO & Assets" 
-          data={[
-            { label: 'Missing Titles', value: target.onPage.missingTitles, status: target.onPage.missingTitles > 0 ? 'error' : 'success' },
-            { label: 'Missing Meta Desc', value: target.onPage.missingMetaDescriptions, status: target.onPage.missingMetaDescriptions > 0 ? 'warning' : 'success' },
-            { label: 'Missing H1s', value: target.onPage.missingH1s, status: target.onPage.missingH1s > 0 ? 'warning' : 'success' },
-            { label: 'Oversize Images (>100kb)', value: target.images.overSizeLimit, status: target.images.overSizeLimit > 5 ? 'warning' : 'success' },
-            { label: 'Images Missing Alt', value: target.images.missingAlt, status: target.images.missingAlt > 0 ? 'warning' : 'success' },
-          ]}
-          details={target.warnings.details}
-        />
+        <div className="space-y-6">
+          <AuditSection 
+            title="On-Page & Semantic Audit" 
+            data={[
+              { label: 'Keyword Optimization', value: `${target.onPage.keywordOptimizationScore}%`, status: target.onPage.keywordOptimizationScore > 80 ? 'success' : 'warning' },
+              { label: 'Missing Titles', value: target.onPage.missingTitles, status: target.onPage.missingTitles > 0 ? 'error' : 'success' },
+              { label: 'Missing Meta Desc', value: target.onPage.missingMetaDescriptions, status: target.onPage.missingMetaDescriptions > 0 ? 'warning' : 'success' },
+              { label: 'Missing H1 Tags', value: target.onPage.missingH1s, status: target.onPage.missingH1s > 0 ? 'warning' : 'success' },
+              { label: 'Oversize Images', value: target.images.overSizeLimit, status: target.images.overSizeLimit > 5 ? 'warning' : 'success' },
+              { label: 'Alt Text Missing', value: target.images.missingAlt, status: target.images.missingAlt > 0 ? 'warning' : 'success' },
+            ]}
+            details={target.warnings.details}
+          />
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+             <h3 className="text-xl font-bold mb-4 text-blue-400">Keyword Gap Analysis</h3>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="p-4 bg-blue-500/5 rounded-xl border border-blue-500/20">
+                   <p className="text-sm font-semibold text-blue-400 mb-2">Target Meta Optimization</p>
+                   <p className="text-2xl font-bold text-white">{target.onPage.keywordOptimizationScore}%</p>
+                   <p className="text-xs text-slate-500 mt-2 italic">Based on title, H1, and meta tag alignment.</p>
+                </div>
+                {competitor?.onPage && (
+                   <div className="p-4 bg-red-500/5 rounded-xl border border-red-500/20">
+                      <p className="text-sm font-semibold text-red-400 mb-2">Competitor Meta Optimization</p>
+                      <p className="text-2xl font-bold text-white">{competitor.onPage.keywordOptimizationScore}%</p>
+                      <p className="text-xs text-slate-500 mt-2 italic">Benchmarked against your top search rival.</p>
+                   </div>
+                )}
+             </div>
+          </div>
+        </div>
       )}
 
       {activeTab === 'backlinks' && (
         <div className="space-y-6">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8">
-            <h3 className="text-xl font-bold mb-6">Backlink & Authority Profile</h3>
+            <h3 className="text-xl font-bold mb-6">Backlink Comparison Profile</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <MetricCard title="Referring Domains" value={target.authority.referringDomains} color="blue" />
+              <MetricCard title="Target Domains" value={target.authority.referringDomains} color="blue" />
+              {competitor && <MetricCard title="Competitor Domains" value={competitor.authority.referringDomains} color="red" />}
               <MetricCard title="Page Rank" value={target.authority.pageRank} color="blue" />
               <MetricCard title="Toxic Links" value={target.authority.toxicLinks} color="red" />
-              <MetricCard title="Domain Authority" value={target.authority.domainAuthority} color="green" />
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="bg-slate-800/30 border border-slate-700 rounded-xl p-6">
-                <h4 className="text-lg font-semibold mb-4 text-blue-400">Top Referring Domains</h4>
+                <h4 className="text-lg font-semibold mb-4 text-blue-400 flex justify-between items-center">
+                   <span>Target Referring Domains</span>
+                   <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">Count: {target.authority.referringDomains}</span>
+                </h4>
                 <ul className="space-y-3">
                   {target.authority.topReferringDomains.map((domain, i) => (
                     <li key={i} className="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg border border-slate-800 transition-hover hover:border-blue-500/50">
@@ -341,17 +401,31 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                 </ul>
               </div>
 
-              <div className="bg-slate-800/30 border border-slate-700 rounded-xl p-6">
-                <h4 className="text-lg font-semibold mb-4 text-yellow-500">Authority Insights</h4>
-                <p className="text-slate-400 text-sm leading-relaxed mb-4">
-                  Referring domains represent the number of unique websites linking to yours. High-quality domains (DA 60+) contribute more significantly to your PageRank.
-                </p>
-                <div className="p-4 bg-yellow-500/5 border border-yellow-500/10 rounded-lg">
-                  <p className="text-xs text-yellow-200 italic">
-                    <span className="font-bold">Pro Tip:</span> Diversity of anchor text and top-level domains (TLDs) is key for a natural-looking backlink profile.
-                  </p>
+              {competitor?.authority && (
+                <div className="bg-slate-800/30 border border-slate-700 rounded-xl p-6">
+                  <h4 className="text-lg font-semibold mb-4 text-red-400 flex justify-between items-center">
+                     <span>Competitor Referring Domains</span>
+                     <span className="text-xs bg-red-500/20 text-red-300 px-2 py-1 rounded">Count: {competitor.authority.referringDomains}</span>
+                  </h4>
+                  <ul className="space-y-3">
+                    {(competitor.authority.topReferringDomains || []).map((domain, i) => (
+                      <li key={i} className="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg border border-slate-800 transition-hover hover:border-red-500/50">
+                        <div className="w-8 h-8 rounded bg-red-500/10 flex items-center justify-center text-red-500 text-xs font-bold">
+                          {domain[0].toUpperCase()}
+                        </div>
+                        <span className="text-sm font-mono text-slate-300">{domain}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </div>
+              )}
+
+              {!competitor && (
+                <div className="bg-slate-800/30 border border-slate-700 rounded-xl p-6 flex flex-col items-center justify-center text-center">
+                  <p className="text-slate-500 italic mb-4">No competitor data to compare.</p>
+                  <button onClick={onReset} className="text-blue-500 text-sm font-semibold hover:underline">Add Competitor to see comparison</button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -371,15 +445,15 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 2v4a2 2 0 002 2h4" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold mb-2">AI Blog Strategist</h3>
+              <h3 className="text-2xl font-bold mb-2">AI Content Roadmap</h3>
               <p className="text-slate-400 max-w-md mx-auto mb-8">
-                Generate a 30-day blog content calendar designed to rank for your niche's most valuable keywords.
+                Generate a 30-day blog content calendar designed to close semantic gaps and rank for high-value keywords.
               </p>
               <button
                 onClick={handleGenerateBlogPlan}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg"
               >
-                Create 30-Day Blog Strategy
+                Create 30-Day Content Roadmap
               </button>
             </div>
           )}
@@ -387,8 +461,8 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
           {isGeneratingContent && (
             <div className="bg-slate-900 border border-slate-800 rounded-3xl p-20 text-center space-y-4">
               <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-              <p className="text-blue-400 font-medium animate-pulse">Consulting Content Strategist...</p>
-              <p className="text-slate-500 text-sm">Mapping topics, keywords, and funnel stages for your growth.</p>
+              <p className="text-blue-400 font-medium animate-pulse">Mapping Content Strategy...</p>
+              <p className="text-slate-500 text-sm">Identifying semantic clusters and funnel opportunities.</p>
             </div>
           )}
 

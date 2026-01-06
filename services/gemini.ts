@@ -19,16 +19,20 @@ export class GeminiService {
       
       Analyze and provide specific data for:
       1. Technical: Redirect chains, robots.txt, HTTPS, mixed content. 
-         - Broken internal links (404 errors on target site domain).
-         - Broken external links (404 errors on outbound domains).
-         - Mixed content resources: Identify SPECIFIC HTTP URLs.
-         - Suggestions: Provide at least 3 actionable technical SEO fix suggestions (e.g., "Implement HSTS", "Fix 301 redirect chain on /about-us").
+         - Mobile Friendliness: True/False.
+         - Performance Score: 0-100.
+         - Internal Linking: Specifically find orphan pages (pages with zero internal links) and broken links.
+         - Suggestions: Provide at least 3 actionable technical SEO fix suggestions.
       2. On-Page: Missing/Duplicate titles, meta descriptions, H1s, Image alt tags, image sizes (>100kb).
+         - Keyword Optimization Score: 0-100 based on keyword placement in titles/H1s/meta.
       3. Speed: Simulated PageSpeed metrics (LCP, FID, CLS, TTI).
       4. Backlinks: Simulated Authority metrics and Toxic Link flagging.
-         - Top Referring Domains: Provide a list of 5 realistic domain names currently linking to this site (e.g., techcrunch.com, github.com).
+         - Top Referring Domains: Provide a list of 5 realistic domain names linking to this site.
       5. Content: Word counts (thin content < 300 words), duplicate content detection.
       6. SWOT Analysis: Strengths, Weaknesses, Opportunities, Threats.
+
+      For the COMPETITOR (if provided), analyze the EXACT SAME fields as the target for comparison:
+      - Health Score, Core Web Vitals, Domain Authority, Performance Score, Mobile Friendliness, Keyword Optimization Score, and Top Referring Domains (5 examples).
 
       Ensure the data is realistic for the provided URLs.
     `;
@@ -80,6 +84,8 @@ export class GeminiService {
                     mixedContent: { type: Type.BOOLEAN },
                     mixedContentUrls: { type: Type.ARRAY, items: { type: Type.STRING } },
                     suggestions: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    mobileFriendly: { type: Type.BOOLEAN },
+                    performanceScore: { type: Type.NUMBER },
                     brokenInternalLinks: {
                       type: Type.OBJECT,
                       properties: {
@@ -95,6 +101,15 @@ export class GeminiService {
                         list: { type: Type.ARRAY, items: { type: Type.STRING } }
                       },
                       required: ["count", "list"]
+                    },
+                    internalLinking: {
+                      type: Type.OBJECT,
+                      properties: {
+                        orphanPagesCount: { type: Type.NUMBER },
+                        orphanPagesList: { type: Type.ARRAY, items: { type: Type.STRING } },
+                        internalLinkScore: { type: Type.NUMBER }
+                      },
+                      required: ["orphanPagesCount", "orphanPagesList", "internalLinkScore"]
                     }
                   },
                   required: [
@@ -104,8 +119,11 @@ export class GeminiService {
                     "mixedContent", 
                     "mixedContentUrls",
                     "suggestions",
+                    "mobileFriendly",
+                    "performanceScore",
                     "brokenInternalLinks", 
-                    "brokenExternalLinks"
+                    "brokenExternalLinks",
+                    "internalLinking"
                   ]
                 },
                 onPage: {
@@ -114,9 +132,10 @@ export class GeminiService {
                     missingTitles: { type: Type.NUMBER },
                     duplicateTitles: { type: Type.NUMBER },
                     missingMetaDescriptions: { type: Type.NUMBER },
-                    missingH1s: { type: Type.NUMBER }
+                    missingH1s: { type: Type.NUMBER },
+                    keywordOptimizationScore: { type: Type.NUMBER }
                   },
-                  required: ["missingTitles", "duplicateTitles", "missingMetaDescriptions", "missingH1s"]
+                  required: ["missingTitles", "duplicateTitles", "missingMetaDescriptions", "missingH1s", "keywordOptimizationScore"]
                 },
                 images: {
                   type: Type.OBJECT,
@@ -174,8 +193,22 @@ export class GeminiService {
                   type: Type.OBJECT,
                   properties: {
                     domainAuthority: { type: Type.NUMBER },
-                    referringDomains: { type: Type.NUMBER }
+                    referringDomains: { type: Type.NUMBER },
+                    topReferringDomains: { type: Type.ARRAY, items: { type: Type.STRING } }
                   }
+                },
+                technical: {
+                    type: Type.OBJECT,
+                    properties: {
+                        performanceScore: { type: Type.NUMBER },
+                        mobileFriendly: { type: Type.BOOLEAN }
+                    }
+                },
+                onPage: {
+                    type: Type.OBJECT,
+                    properties: {
+                        keywordOptimizationScore: { type: Type.NUMBER }
+                    }
                 }
               }
             },
@@ -206,15 +239,14 @@ export class GeminiService {
       Weaknesses: ${audit.swot.weaknesses.join(', ')}
 
       Create a 30-day Blog Content Strategy. 
-      Instead of social media posts, suggest 8-12 high-impact blog post topics (spaced out over the 30 days, e.g., 2-3 per week).
       The goal is to fix content gaps (weaknesses) and capitalize on opportunities.
       
       For each suggested post, provide:
-      1. day: The suggested day of the month for publication (1-30).
-      2. title: A catchy, SEO-optimized H1 title.
-      3. outline: A brief outline of what the post should cover.
-      4. funnelStage: 'TOFU' (Top of Funnel), 'MOFU' (Middle), or 'BOFU' (Bottom).
-      5. targetKeywords: 3 target SEO keywords for the post.
+      1. day: The suggested day (1-30).
+      2. title: SEO-optimized title.
+      3. outline: Brief outline.
+      4. funnelStage: 'TOFU', 'MOFU', or 'BOFU'.
+      5. targetKeywords: 3 target SEO keywords.
       6. suggestedWordCount: Recommended length.
 
       Also provide a strategySummary explaining how this plan addresses the site's current SEO standing.
@@ -262,8 +294,7 @@ export class GeminiService {
       Funnel Stage: ${post.funnelStage}
       Recommended Word Count: ~${post.suggestedWordCount}
 
-      Structure the post with clear headings (H2, H3), an engaging introduction, a conclusion, and a call-to-action.
-      Use Markdown formatting for the entire response.
+      Structure with clear headings, introduction, conclusion, and CTA. Use Markdown.
     `;
 
     const response = await this.ai.models.generateContent({

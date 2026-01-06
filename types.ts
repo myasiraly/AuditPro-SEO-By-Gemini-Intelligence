@@ -22,6 +22,8 @@ export interface SEOAuditData {
     mixedContent: boolean;
     mixedContentUrls: string[];
     suggestions: string[];
+    mobileFriendly: boolean;
+    performanceScore: number;
     brokenInternalLinks: {
       count: number;
       list: string[];
@@ -30,12 +32,18 @@ export interface SEOAuditData {
       count: number;
       list: string[];
     };
+    internalLinking: {
+      orphanPagesCount: number;
+      orphanPagesList: string[];
+      internalLinkScore: number;
+    };
   };
   onPage: {
     missingTitles: number;
     duplicateTitles: number;
     missingMetaDescriptions: number;
     missingH1s: number;
+    keywordOptimizationScore: number;
   };
   images: {
     overSizeLimit: number;
