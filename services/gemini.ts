@@ -11,30 +11,21 @@ export class GeminiService {
 
   async performSEOAudit(targetUrl: string, competitorUrl?: string): Promise<AuditResult> {
     const prompt = `
-      Act as a Senior SEO Expert and Technical Lead. Perform an exhaustive SEO audit for the target site: ${targetUrl} 
-      ${competitorUrl ? `and compare it against its main competitor: ${competitorUrl}.` : ''}
+      Act as a Senior SEO Expert and Market Research Analyst. Perform an exhaustive deep-dive SEO audit for the target site: ${targetUrl} 
+      ${competitorUrl ? `benchmarked against the competitor: ${competitorUrl}.` : ''}
       
-      CRITICAL TECHNICAL AUDIT REQUIREMENT:
-      Identify and list specific technical failures:
-      1. Broken Internal Links: Links pointing to missing pages on the same domain (404s).
-      2. Broken External Links: Outbound links pointing to dead external resources.
-      3. Orphan Pages: Pages on the site that have zero incoming internal links from other pages on the same domain.
+      CRITICAL INSTRUCTIONS:
+      1. USE GOOGLE SEARCH GROUNDING: Find real-world organic ranking data, top performing pages, and keyword sets for both domains.
+      2. CRAWL POLICY: Simulate a polite crawl using logic equivalent to "time.sleep(2)" between requests to avoid detection.
+      3. ORGANIC INTEL: 
+         - Identify Top 10 performing pages for both sites.
+         - Identify Top 10 organic keywords for both sites.
+         - Identify frequent topics in the competitor's blog/resources section.
+      4. ON-PAGE SEO FIXES: Provide specific, actionable suggestions for improving title tag lengths (aim for 50-60 chars), meta description effectiveness (compelling CTAs, 150-160 chars), and H1 usage (semantic uniqueness).
+      5. GAP ANALYSIS: Find 3 high-intent topics covered by ${competitorUrl} that ${targetUrl} is missing.
+      6. SERP ANALYSIS: For the primary keywords, provide ranking estimates comparing target vs competitor.
+      7. TECHNICAL: Identify broken links (internal/external), redirect chains, and performance scores.
       
-      Analyze and provide specific data for:
-      - Technical: Redirect chains, robots.txt, HTTPS status, mixed content resources. 
-         - Mobile Friendliness: True/False.
-         - Performance Score: 0-100 scale.
-         - Broken Internal/External Links: Return counts and lists of URLs.
-         - Internal Linking Analysis: Identify specific Orphan Pages (count and list) and calculate an Internal Link Score (0-100).
-      - On-Page & Semantic: Missing/Duplicate meta tags, H1 usage, and Image Alt text.
-         - Keyword Optimization: Score 0-100.
-      - Authority: Domain Authority, Page Rank, and Toxic Link counts.
-         - Top 5 Referring Domains: List specific linking domains.
-      - SWOT Analysis: Actionable Strengths, Weaknesses, Opportunities, and Threats.
-
-      COMPETITIVE BENCHMARKING (if competitor provided):
-      For the COMPETITOR, return the exact same broken link metrics AND Orphan Page metrics (count and lists), health score, and authority.
-
       The response MUST be strictly valid JSON according to the requested schema.
     `;
 
@@ -42,6 +33,7 @@ export class GeminiService {
       model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
+        tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
@@ -115,7 +107,39 @@ export class GeminiService {
                     duplicateTitles: { type: Type.NUMBER },
                     missingMetaDescriptions: { type: Type.NUMBER },
                     missingH1s: { type: Type.NUMBER },
-                    keywordOptimizationScore: { type: Type.NUMBER }
+                    keywordOptimizationScore: { type: Type.NUMBER },
+                    actionableSuggestions: { type: Type.ARRAY, items: { type: Type.STRING } }
+                  }
+                },
+                organicIntel: {
+                  type: Type.OBJECT,
+                  properties: {
+                    topKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    topPages: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    gapAnalysis: {
+                      type: Type.ARRAY,
+                      items: {
+                        type: Type.OBJECT,
+                        properties: {
+                          topic: { type: Type.STRING },
+                          intent: { type: Type.STRING },
+                          competitorUrl: { type: Type.STRING }
+                        }
+                      }
+                    },
+                    frequentTopics: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    serpAnalysis: {
+                      type: Type.ARRAY,
+                      items: {
+                        type: Type.OBJECT,
+                        properties: {
+                          query: { type: Type.STRING },
+                          targetRank: { type: Type.NUMBER },
+                          competitorRank: { type: Type.NUMBER },
+                          topCompetitor: { type: Type.STRING }
+                        }
+                      }
+                    }
                   }
                 },
                 images: {
@@ -153,7 +177,7 @@ export class GeminiService {
                   }
                 }
               },
-              required: ["url", "healthScore", "technical", "onPage", "authority"]
+              required: ["url", "healthScore", "technical", "onPage", "authority", "organicIntel"]
             },
             competitor: {
               type: Type.OBJECT,
@@ -164,29 +188,19 @@ export class GeminiService {
                     type: Type.OBJECT,
                     properties: {
                         performanceScore: { type: Type.NUMBER },
-                        mobileFriendly: { type: Type.BOOLEAN },
                         brokenInternalLinks: {
                           type: Type.OBJECT,
-                          properties: {
-                            count: { type: Type.NUMBER },
-                            list: { type: Type.ARRAY, items: { type: Type.STRING } }
-                          }
-                        },
-                        brokenExternalLinks: {
-                          type: Type.OBJECT,
-                          properties: {
-                            count: { type: Type.NUMBER },
-                            list: { type: Type.ARRAY, items: { type: Type.STRING } }
-                          }
-                        },
-                        internalLinking: {
-                          type: Type.OBJECT,
-                          properties: {
-                            orphanPagesCount: { type: Type.NUMBER },
-                            orphanPagesList: { type: Type.ARRAY, items: { type: Type.STRING } }
-                          }
+                          properties: { count: { type: Type.NUMBER } }
                         }
                     }
+                },
+                organicIntel: {
+                  type: Type.OBJECT,
+                  properties: {
+                    topKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    topPages: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    frequentTopics: { type: Type.ARRAY, items: { type: Type.STRING } }
+                  }
                 },
                 authority: {
                   type: Type.OBJECT,
@@ -195,12 +209,6 @@ export class GeminiService {
                     referringDomains: { type: Type.NUMBER },
                     topReferringDomains: { type: Type.ARRAY, items: { type: Type.STRING } }
                   }
-                },
-                onPage: {
-                    type: Type.OBJECT,
-                    properties: {
-                        keywordOptimizationScore: { type: Type.NUMBER }
-                    }
                 }
               }
             },
@@ -220,7 +228,7 @@ export class GeminiService {
       }
     });
 
-    return JSON.parse(response.text);
+    return JSON.parse(response.text || '{}');
   }
 
   async generateBlogContentPlan(audit: AuditResult): Promise<ContentPlan> {
@@ -252,7 +260,7 @@ export class GeminiService {
         }
       }
     });
-    return JSON.parse(response.text);
+    return JSON.parse(response.text || '{}');
   }
 
   async writeFullBlog(post: BlogPost): Promise<string> {

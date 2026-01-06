@@ -44,6 +44,23 @@ export interface SEOAuditData {
     missingMetaDescriptions: number;
     missingH1s: number;
     keywordOptimizationScore: number;
+    actionableSuggestions: string[];
+  };
+  organicIntel: {
+    topKeywords: string[];
+    topPages: string[];
+    gapAnalysis: {
+      topic: string;
+      intent: string;
+      competitorUrl: string;
+    }[];
+    frequentTopics: string[];
+    serpAnalysis?: {
+      query: string;
+      targetRank: number;
+      competitorRank: number;
+      topCompetitor: string;
+    }[];
   };
   images: {
     overSizeLimit: number;
