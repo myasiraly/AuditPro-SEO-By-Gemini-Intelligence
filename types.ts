@@ -4,6 +4,19 @@ export interface GroundingSource {
   uri: string;
 }
 
+export interface StrategicGap {
+  category: 'Content' | 'Technical' | 'Authority' | 'UX';
+  description: string;
+  impact: 'High' | 'Medium' | 'Low';
+  difficulty: 'High' | 'Medium' | 'Low';
+  remedy: string;
+}
+
+export interface TrafficDataPoint {
+  date: string;
+  visits: number;
+}
+
 export interface CompetitiveIntelligence {
   estimatedPpcValue: string;
   serpFeatures: { feature: string; ownedByTarget: boolean; ownedByCompetitor: boolean }[];
@@ -15,6 +28,7 @@ export interface CompetitiveIntelligence {
   };
   marketPosition: 'Leader' | 'Challenger' | 'Niche' | 'Laggard';
   tacticalRecommendations: string[];
+  strategicGaps: StrategicGap[];
   ppcIntel?: {
     estimatedMonthlySpend: string;
     adStrategy: string;
@@ -84,6 +98,7 @@ export interface SEOAuditData {
   };
   organicIntel: {
     estimatedMonthlyTraffic: number;
+    dailyTrafficStats: TrafficDataPoint[];
     topKeywords: {
       keyword: string;
       volume: string;

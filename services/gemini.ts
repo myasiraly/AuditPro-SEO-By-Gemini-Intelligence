@@ -22,13 +22,12 @@ export class GeminiService {
       ${competitorInstruction}
       
       CORE ANALYTICS REQUIREMENTS:
-      1. ON-PAGE PRECISION: 
+      1. TRAFFIC TRENDS: Provide estimated daily traffic visits for the last 30 days for the TARGET.
+      2. STRATEGY GAPS: Identify 4 high-level strategic gaps where the competitor is winning (e.g. Video Strategy, Semantic Depth, Backlink Velocity, Local Search).
+      3. ON-PAGE PRECISION: 
          - Analyze Title Tag lengths. Provide specific fixes if not 50-60 chars.
-         - Evaluate Meta Description effectiveness (compelling CTA, keyword inclusion). Provide 3 concrete rewrites.
-         - Audit H1 usage (is it unique? does it contain the primary keyword?).
-      2. SEMANTIC KEYWORD DELTA: Compare Target vs Competitor on keyword density and prominence.
-      3. TECHNICAL QUICK FIXES: Identify potential "warnings" (performance < 70, broken links, missing HTTPS) and provide 1-sentence instant technical remedies.
-      4. PPC & MARKET INTEL: Estimate rival's monthly PPC budget, their high-intent "Golden Keywords," and their content strategy velocity.
+         - Evaluate Meta Description effectiveness (compelling CTA, keyword inclusion).
+      4. PPC & MARKET INTEL: Estimate rival's monthly PPC budget and top paid keywords.
       5. STRATEGIC INSIGHT: Provide 3 "Outranking Tactics" specifically designed to steal traffic from the competitor.
 
       STRICT JSON SCHEMA REQUIRED.
@@ -79,6 +78,16 @@ export class GeminiService {
                   type: Type.OBJECT,
                   properties: {
                     estimatedMonthlyTraffic: { type: Type.NUMBER },
+                    dailyTrafficStats: {
+                      type: Type.ARRAY,
+                      items: {
+                        type: Type.OBJECT,
+                        properties: {
+                          date: { type: Type.STRING },
+                          visits: { type: Type.NUMBER }
+                        }
+                      }
+                    },
                     topKeywords: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { keyword: { type: Type.STRING }, volume: { type: Type.STRING }, difficulty: { type: Type.NUMBER }, intent: { type: Type.STRING } } } }
                   }
                 },
@@ -125,6 +134,19 @@ export class GeminiService {
                         marketPosition: { type: Type.STRING },
                         contentVelocity: { type: Type.STRING },
                         tacticalRecommendations: { type: Type.ARRAY, items: { type: Type.STRING } },
+                        strategicGaps: {
+                          type: Type.ARRAY,
+                          items: {
+                            type: Type.OBJECT,
+                            properties: {
+                              category: { type: Type.STRING },
+                              description: { type: Type.STRING },
+                              impact: { type: Type.STRING },
+                              difficulty: { type: Type.STRING },
+                              remedy: { type: Type.STRING }
+                            }
+                          }
+                        },
                         keywordOverlap: { type: Type.OBJECT, properties: { shared: { type: Type.NUMBER }, targetUnique: { type: Type.NUMBER }, competitorUnique: { type: Type.NUMBER } } },
                         serpFeatures: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { feature: { type: Type.STRING }, ownedByTarget: { type: Type.BOOLEAN }, ownedByCompetitor: { type: Type.BOOLEAN } } } },
                         ppcIntel: {

@@ -1,12 +1,12 @@
 
 import React, { useState } from 'react';
-import { AuditResult, ContentPlan } from '../types';
+import { AuditResult, ContentPlan, StrategicGap } from '../types';
 import MetricCard from './MetricCard';
 import AuditSection from './AuditSection';
 import SWOTAnalysisView from './SWOTAnalysis';
 import BlogContentPlanView from './BlogContentPlan';
 import { GeminiService } from '../services/gemini';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, Radar } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, Radar } from 'recharts';
 
 interface DashboardProps {
   result: AuditResult;
@@ -28,6 +28,8 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
     { name: 'Target', value: target?.organicIntel?.estimatedMonthlyTraffic || 1, fill: '#8b5cf6' },
     ...(competitor ? [{ name: 'Competitor', value: competitor.organicIntel?.estimatedMonthlyTraffic || 1, fill: '#fb7185' }] : []),
   ];
+
+  const dailyTrend = target?.organicIntel?.dailyTrafficStats || [];
 
   const radarData = competitor?.organicIntel?.competitiveIntelligence?.serpFeatures?.map(f => ({
     subject: f.feature,
@@ -101,51 +103,57 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
 
       <div className="mt-4">
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <MetricCard title="Health Index" value={`${target.healthScore || 0}%`} subtitle="Site Integrity" color="violet" />
-                <MetricCard title="Organic Flow" value={target.organicIntel?.estimatedMonthlyTraffic?.toLocaleString() || '0'} subtitle="Monthly Sessions" color="cyan" />
-                <MetricCard title="Authority" value={target.authority?.domainAuthority || 0} subtitle="DA Score" color="indigo" />
-              </div>
-              <div className="glass-panel rounded-[40px] p-10">
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <MetricCard title="Health Index" value={`${target.healthScore || 0}%`} subtitle="Site Integrity" color="violet" />
+              <MetricCard title="Organic Flow" value={target.organicIntel?.estimatedMonthlyTraffic?.toLocaleString() || '0'} subtitle="Monthly Sessions" color="cyan" />
+              <MetricCard title="Authority" value={target.authority?.domainAuthority || 0} subtitle="DA Score" color="indigo" />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 glass-panel rounded-[40px] p-10">
                 <h3 className="text-[11px] font-black mb-12 text-slate-500 uppercase tracking-widest-label flex items-center gap-3">
                   <span className="w-1 h-5 bg-violet-500 rounded-full"></span>
-                  Market Benchmarking
+                  Daily Traffic Trend (30d)
                 </h3>
                 <div className="h-80 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData}>
+                    <AreaChart data={dailyTrend}>
+                      <defs>
+                        <linearGradient id="colorVisits" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" vertical={false} />
-                      <XAxis dataKey="name" stroke="#475569" fontSize={10} fontStyle="italic" fontWeight={800} />
+                      <XAxis dataKey="date" stroke="#475569" fontSize={10} fontStyle="italic" fontWeight={800} />
                       <YAxis stroke="#475569" fontSize={10} fontWeight={800} />
                       <Tooltip contentStyle={{ backgroundColor: '#0a0a0f', border: 'none', borderRadius: '16px' }} />
-                      <Bar dataKey="score" radius={[8, 8, 0, 0]} barSize={60}>
-                        {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
-                      </Bar>
-                    </BarChart>
+                      <Area type="monotone" dataKey="visits" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorVisits)" />
+                    </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </div>
-            </div>
-            <div className="glass-panel rounded-[40px] p-10 flex flex-col">
-              <h3 className="text-[11px] font-black mb-12 text-slate-500 uppercase tracking-widest-label flex items-center gap-3">
-                <span className="w-1 h-5 bg-cyan-500 rounded-full"></span>
-                Traffic Dominance
-              </h3>
-              <div className="flex-1 min-h-[300px] relative">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={trafficData} innerRadius={80} outerRadius={105} paddingAngle={10} dataKey="value" stroke="none">
-                      {trafficData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="space-y-4 mt-8 pt-8 border-t border-white/5">
-                <VitalRow label="Market Status" value={competitor?.organicIntel?.competitiveIntelligence?.marketPosition || 'Challenger'} highlight />
-                <VitalRow label="Keyword Reach" value={target.organicIntel?.topKeywords?.length?.toString() || '0'} />
+
+              <div className="glass-panel rounded-[40px] p-10 flex flex-col">
+                <h3 className="text-[11px] font-black mb-12 text-slate-500 uppercase tracking-widest-label flex items-center gap-3">
+                  <span className="w-1 h-5 bg-cyan-500 rounded-full"></span>
+                  Traffic Dominance
+                </h3>
+                <div className="flex-1 min-h-[300px] relative">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={trafficData} innerRadius={80} outerRadius={105} paddingAngle={10} dataKey="value" stroke="none">
+                        {trafficData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="space-y-4 mt-8 pt-8 border-t border-white/5">
+                  <VitalRow label="Market Status" value={competitor?.organicIntel?.competitiveIntelligence?.marketPosition || 'Challenger'} highlight />
+                  <VitalRow label="Keyword Reach" value={target.organicIntel?.topKeywords?.length?.toString() || '0'} />
+                </div>
               </div>
             </div>
           </div>
@@ -173,12 +181,25 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
               </div>
             </div>
 
+            {/* Strategic Gaps Identification */}
+            <div className="glass-panel rounded-[40px] p-10 border-rose-500/10">
+              <h3 className="text-[11px] font-black mb-10 text-rose-400 uppercase tracking-widest-label flex items-center gap-3">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                Strategic Competitive Gaps
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {competitor?.organicIntel?.competitiveIntelligence?.strategicGaps?.map((gap, i) => (
+                  <StrategicGapCard key={i} gap={gap} />
+                )) || <p className="p-10 text-slate-600 italic">Synthesizing strategic intelligence...</p>}
+              </div>
+            </div>
+
             {/* Outranking Strategy Pane */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                <div className="glass-panel rounded-[40px] p-10 bg-gradient-to-br from-indigo-600/5 to-transparent border-indigo-500/10">
                   <h3 className="text-[11px] font-black mb-10 text-indigo-400 uppercase tracking-widest-label flex items-center gap-3">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-                    Strategic Outranking Tactics
+                    Operational Insights
                   </h3>
                   <div className="space-y-5">
                     {competitor?.organicIntel?.competitiveIntelligence?.tacticalRecommendations?.map((tact, i) => (
@@ -191,7 +212,7 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                </div>
 
                <div className="glass-panel rounded-[40px] p-10">
-                  <h3 className="text-[11px] font-black mb-10 text-slate-500 uppercase tracking-widest-label">Competitive Keyword Overlay</h3>
+                  <h3 className="text-[11px] font-black mb-10 text-slate-500 uppercase tracking-widest-label">Competitive Feature Overlay</h3>
                   <div className="h-64 w-full mb-8">
                     <ResponsiveContainer width="100%" height="100%">
                       <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
@@ -439,6 +460,32 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
             {contentPlan && <BlogContentPlanView plan={contentPlan} />}
           </div>
         )}
+      </div>
+    </div>
+  );
+};
+
+const StrategicGapCard: React.FC<{ gap: StrategicGap }> = ({ gap }) => {
+  const impactColors = {
+    High: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+    Medium: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+    Low: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
+  };
+
+  return (
+    <div className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl hover:border-rose-500/30 transition-all">
+      <div className="flex justify-between items-center mb-4">
+        <span className="px-3 py-1 bg-white/5 rounded-lg text-[10px] font-black uppercase text-slate-500 border border-white/5 tracking-widest-label">
+          {gap.category}
+        </span>
+        <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest-label border ${impactColors[gap.impact]}`}>
+          {gap.impact} Impact
+        </span>
+      </div>
+      <p className="text-sm font-bold text-white mb-3">{gap.description}</p>
+      <div className="mt-4 pt-4 border-t border-white/5">
+        <p className="text-[9px] font-black text-rose-500 uppercase mb-2 tracking-widest-label">Strategy Remedy</p>
+        <p className="text-[11px] text-slate-400 font-medium leading-relaxed">{gap.remedy}</p>
       </div>
     </div>
   );
