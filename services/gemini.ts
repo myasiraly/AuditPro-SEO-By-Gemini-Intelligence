@@ -23,14 +23,15 @@ export class GeminiService {
       
       CORE ANALYTICS REQUIREMENTS:
       1. TRAFFIC TRENDS: Provide estimated daily traffic visits for the last 30 days for the TARGET.
-      2. STRATEGY GAPS: Identify 4 high-level strategic gaps where the competitor is winning (e.g. Video Strategy, Semantic Depth, Backlink Velocity, Local Search).
-      3. ON-PAGE PRECISION: 
-         - Analyze Title Tag lengths. Provide specific fixes if not 50-60 chars.
-         - Evaluate Meta Description effectiveness (compelling CTA, keyword inclusion).
-      4. PPC & MARKET INTEL: Estimate rival's monthly PPC budget and top paid keywords.
-      5. STRATEGIC INSIGHT: Provide 3 "Outranking Tactics" specifically designed to steal traffic from the competitor.
+      2. TOP SEARCH KEYWORDS: Extract the top 10 most valuable organic search keywords for BOTH target and competitor. 
+         - Include Monthly Volume (e.g. "12.5K"), Keyword Difficulty (0-100), and Search Intent (Informational, Navigational, Commercial, or Transactional).
+      3. STRATEGY GAPS: Identify 4 high-level strategic gaps where the competitor is winning.
+      4. ON-PAGE PRECISION: 
+         - Analyze Title Tag lengths and Meta Description effectiveness.
+      5. PPC & MARKET INTEL: Estimate rival's monthly PPC budget and top paid keywords.
+      6. STRATEGIC INSIGHT: Provide 3 "Outranking Tactics" specifically designed to steal traffic from the competitor.
 
-      STRICT JSON SCHEMA REQUIRED.
+      STRICT JSON SCHEMA REQUIRED. Ensure all numeric values are integers or floats.
     `;
 
     const response = await ai.models.generateContent({
@@ -127,6 +128,7 @@ export class GeminiService {
                   type: Type.OBJECT,
                   properties: {
                     estimatedMonthlyTraffic: { type: Type.NUMBER },
+                    topKeywords: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { keyword: { type: Type.STRING }, volume: { type: Type.STRING }, difficulty: { type: Type.NUMBER }, intent: { type: Type.STRING } } } },
                     competitiveIntelligence: {
                       type: Type.OBJECT,
                       properties: {

@@ -15,7 +15,7 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
   const { target, competitor, swot } = result;
-  const [activeTab, setActiveTab] = useState<'overview' | 'technical' | 'competitive' | 'onpage' | 'backlinks' | 'swot' | 'blog'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'technical' | 'competitive' | 'keywords' | 'onpage' | 'backlinks' | 'swot' | 'blog'>('overview');
   const [contentPlan, setContentPlan] = useState<ContentPlan | null>(null);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
 
@@ -37,6 +37,14 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
     competitor: f.ownedByCompetitor ? 100 : 20,
     fullMark: 100,
   })) || [];
+
+  // Data for Keyword Power Index chart
+  const keywordStatsData = target?.organicIntel?.topKeywords?.map(kw => ({
+    keyword: kw.keyword,
+    difficulty: kw.difficulty,
+    // Parsing volume string like "12.5K" to number for chart
+    volume: parseFloat(kw.volume.replace(/[^0-9.]/g, '')) * (kw.volume.includes('K') ? 1000 : 1)
+  })).slice(0, 5) || [];
 
   const handleGenerateBlogPlan = async () => {
     setIsGeneratingContent(true);
@@ -84,6 +92,7 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
           { id: 'overview', label: 'Overview' },
           { id: 'technical', label: 'Technical' },
           { id: 'competitive', label: 'Competitive Recon' },
+          { id: 'keywords', label: 'Keywords Explorer' },
           { id: 'onpage', label: 'On-Page SEO' },
           { id: 'backlinks', label: 'Authority' },
           { id: 'swot', label: 'SWOT Analysis' },
@@ -156,6 +165,124 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {activeTab === 'keywords' && (
+          <div className="space-y-12 animate-in fade-in duration-700">
+             {/* Keyword Analytics Header */}
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="glass-panel rounded-[40px] p-10">
+                   <h3 className="text-[11px] font-black mb-10 text-violet-400 uppercase tracking-widest-label">Keyword Difficulty vs Volume</h3>
+                   <div className="h-64 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={keywordStatsData}>
+                           <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" vertical={false} />
+                           <XAxis dataKey="keyword" stroke="#475569" fontSize={9} fontWeight={700} />
+                           <YAxis stroke="#475569" fontSize={9} fontWeight={700} />
+                           <Tooltip contentStyle={{ backgroundColor: '#0a0a0f', border: 'none', borderRadius: '12px' }} />
+                           <Bar dataKey="difficulty" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="KD Score" barSize={30} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                   </div>
+                </div>
+                <div className="glass-panel rounded-[40px] p-10">
+                   <h3 className="text-[11px] font-black mb-10 text-cyan-400 uppercase tracking-widest-label">Strategic Value Metrics</h3>
+                   <div className="space-y-6">
+                      <div className="flex justify-between items-center p-6 bg-white/[0.02] border border-white/5 rounded-3xl">
+                         <div>
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">High Intent Reach</p>
+                            <p className="text-xl font-extrabold text-white font-display">
+                               {target.organicIntel.topKeywords.filter(k => k.intent.toLowerCase().includes('trans') || k.intent.toLowerCase().includes('comm')).length} Keywords
+                            </p>
+                         </div>
+                         <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zM12 11c0 0.552-0.448 1-1 1s-1-0.448-1-1 0.448-1 1-1 1 0.448 1 1z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zM12 4c4.411 0 8 3.589 8 8s-3.589 8-8 8-8-3.589-8-8 3.589-8 8-8z" /></svg>
+                         </div>
+                      </div>
+                      <div className="flex justify-between items-center p-6 bg-white/[0.02] border border-white/5 rounded-3xl">
+                         <div>
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Avg. Difficulty</p>
+                            <p className="text-xl font-extrabold text-white font-display">
+                               {Math.round(target.organicIntel.topKeywords.reduce((acc, curr) => acc + curr.difficulty, 0) / (target.organicIntel.topKeywords.length || 1))} / 100
+                            </p>
+                         </div>
+                         <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+
+             {/* Keywords Main Comparison Table */}
+             <div className="glass-panel rounded-[40px] overflow-hidden">
+                <div className="p-10 border-b border-white/10 flex justify-between items-center bg-white/[0.01]">
+                   <h3 className="text-2xl font-extrabold text-white font-display tracking-tight">Search Keywords Recon</h3>
+                   <div className="flex gap-4">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-violet-500"></span>
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest-label">Target Domain</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest-label">Top Rival</span>
+                      </div>
+                   </div>
+                </div>
+                <div className="overflow-x-auto">
+                   <table className="w-full text-left">
+                      <thead>
+                         <tr className="bg-black/40 text-[10px] font-black uppercase tracking-widest-label text-slate-600 border-b border-white/5">
+                            <th className="px-10 py-6">Search Query</th>
+                            <th className="px-10 py-6">Domain</th>
+                            <th className="px-10 py-6">Intent Mapping</th>
+                            <th className="px-10 py-6 text-right">Difficulty (KD)</th>
+                            <th className="px-10 py-6 text-right">Est. Volume</th>
+                         </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                         {/* Interleaving Target and Competitor Keywords for Comparison */}
+                         {[
+                            ...target.organicIntel.topKeywords.map(k => ({ ...k, domain: 'Target', color: 'violet' })),
+                            ...(competitor?.organicIntel.topKeywords.map(k => ({ ...k, domain: 'Competitor', color: 'rose' })) || [])
+                         ].sort((a, b) => {
+                            const valA = parseFloat(a.volume.replace(/[^0-9.]/g, '')) * (a.volume.includes('K') ? 1000 : 1);
+                            const valB = parseFloat(b.volume.replace(/[^0-9.]/g, '')) * (b.volume.includes('K') ? 1000 : 1);
+                            return valB - valA;
+                         }).map((kw, i) => (
+                            <tr key={i} className="hover:bg-white/[0.02] group transition-all">
+                               <td className="px-10 py-6">
+                                  <p className="font-bold text-slate-100 text-sm group-hover:text-violet-400 transition-colors">{kw.keyword}</p>
+                               </td>
+                               <td className="px-10 py-6">
+                                  <span className={`text-[10px] font-black uppercase tracking-widest-label ${kw.color === 'violet' ? 'text-violet-400' : 'text-rose-400'}`}>
+                                     {kw.domain}
+                                  </span>
+                               </td>
+                               <td className="px-10 py-6">
+                                  <IntentBadge intent={kw.intent} />
+                               </td>
+                               <td className="px-10 py-6 text-right">
+                                  <div className="flex items-center justify-end gap-3">
+                                     <div className="w-16 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                        <div 
+                                           className={`h-full ${kw.difficulty > 70 ? 'bg-rose-500' : kw.difficulty > 40 ? 'bg-amber-500' : 'bg-emerald-500'}`} 
+                                           style={{ width: `${kw.difficulty}%` }}
+                                        ></div>
+                                     </div>
+                                     <span className="text-xs font-mono font-bold text-slate-400">{kw.difficulty}%</span>
+                                  </div>
+                               </td>
+                               <td className="px-10 py-6 text-right">
+                                  <span className="text-sm font-black text-cyan-400 font-display">{kw.volume}</span>
+                               </td>
+                            </tr>
+                         ))}
+                      </tbody>
+                   </table>
+                </div>
+             </div>
           </div>
         )}
 
@@ -351,9 +478,9 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                </div>
             </div>
 
-            {/* Keyword Comparison Table */}
+            {/* Semantic Comparison Grid */}
             <div className="glass-panel rounded-[40px] p-10">
-               <h3 className="text-[11px] font-black mb-10 text-slate-500 uppercase tracking-widest-label">Semantic Keyword Prominence Analysis</h3>
+               <h3 className="text-[11px] font-black mb-10 text-slate-500 uppercase tracking-widest-label">Top On-Page Semantic Prominence</h3>
                <div className="overflow-x-auto">
                  <table className="w-full text-left">
                    <thead>
@@ -463,6 +590,22 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
       </div>
     </div>
   );
+};
+
+const IntentBadge: React.FC<{ intent: string }> = ({ intent }) => {
+   const lower = intent.toLowerCase();
+   let styles = 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+   
+   if (lower.includes('trans')) styles = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+   else if (lower.includes('comm')) styles = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+   else if (lower.includes('info')) styles = 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20';
+   else if (lower.includes('nav')) styles = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+
+   return (
+      <span className={`px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest-label border ${styles}`}>
+         {intent}
+      </span>
+   );
 };
 
 const StrategicGapCard: React.FC<{ gap: StrategicGap }> = ({ gap }) => {
