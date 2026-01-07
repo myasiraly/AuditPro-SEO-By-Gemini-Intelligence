@@ -8,7 +8,8 @@ import {
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
   onAuthStateChanged,
-  signOut
+  signOut,
+  browserPopupRedirectResolver
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 // Production configuration for AuditPro SEO
@@ -25,6 +26,11 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
+// Ensure the user is prompted to select their account, which helps in multi-login scenarios
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
+
 export { 
   auth, 
   googleProvider, 
@@ -33,5 +39,6 @@ export {
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
   onAuthStateChanged,
-  signOut 
+  signOut,
+  browserPopupRedirectResolver
 };
