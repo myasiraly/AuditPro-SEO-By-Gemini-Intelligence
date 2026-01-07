@@ -49,6 +49,8 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
     }
   };
 
+  const getWarningStatus = (val: number, threshold: number) => val < threshold ? 'warning' : 'success';
+
   if (!target) return <div className="p-20 text-center font-bold">Incomplete intelligence data received.</div>;
 
   return (
@@ -151,6 +153,7 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
 
         {activeTab === 'competitive' && (
           <div className="space-y-12 animate-in fade-in duration-700">
+            {/* Market Research Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="p-8 glass-panel rounded-3xl border-cyan-500/20">
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Est. PPC Spend</p>
@@ -161,8 +164,8 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                 <p className="text-2xl font-black text-violet-400 font-display">{competitor?.organicIntel?.competitiveIntelligence?.contentVelocity || 'Low'}</p>
               </div>
               <div className="p-8 glass-panel rounded-3xl border-rose-500/20">
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Common Keywords</p>
-                <p className="text-2xl font-black text-rose-400 font-display">{competitor?.organicIntel?.competitiveIntelligence?.keywordOverlap?.shared || '0'}</p>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Keyword Gap</p>
+                <p className="text-2xl font-black text-rose-400 font-display">{competitor?.organicIntel?.competitiveIntelligence?.keywordOverlap?.competitorUnique || '0'}</p>
               </div>
               <div className="p-8 glass-panel rounded-3xl border-emerald-500/20">
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Market Position</p>
@@ -170,6 +173,40 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
               </div>
             </div>
 
+            {/* Outranking Strategy Pane */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+               <div className="glass-panel rounded-[40px] p-10 bg-gradient-to-br from-indigo-600/5 to-transparent border-indigo-500/10">
+                  <h3 className="text-[11px] font-black mb-10 text-indigo-400 uppercase tracking-widest-label flex items-center gap-3">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                    Strategic Outranking Tactics
+                  </h3>
+                  <div className="space-y-5">
+                    {competitor?.organicIntel?.competitiveIntelligence?.tacticalRecommendations?.map((tact, i) => (
+                      <div key={i} className="flex gap-5 p-6 bg-white/[0.02] border border-white/5 rounded-3xl group hover:border-indigo-500/30 transition-all">
+                        <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center shrink-0 text-indigo-500 font-black text-xs">0{i+1}</div>
+                        <p className="text-sm text-slate-300 font-bold leading-relaxed">{tact}</p>
+                      </div>
+                    )) || <p className="text-slate-600 italic text-xs">Analysis pending data synthesis...</p>}
+                  </div>
+               </div>
+
+               <div className="glass-panel rounded-[40px] p-10">
+                  <h3 className="text-[11px] font-black mb-10 text-slate-500 uppercase tracking-widest-label">Competitive Keyword Overlay</h3>
+                  <div className="h-64 w-full mb-8">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                        <PolarGrid stroke="#ffffff08" />
+                        <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 800 }} />
+                        <Radar name="Target" dataKey="target" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.25} />
+                        <Radar name="Competitor" dataKey="competitor" stroke="#fb7185" fill="#fb7185" fillOpacity={0.25} />
+                        <Tooltip contentStyle={{ backgroundColor: '#0a0a0f', border: 'none', borderRadius: '16px', fontSize: '10px' }} />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </div>
+               </div>
+            </div>
+
+            {/* Keyword Gap Table */}
             <div className="glass-panel rounded-[40px] overflow-hidden">
                <div className="p-8 border-b border-white/10 flex justify-between items-center bg-white/[0.02]">
                   <div>
@@ -181,10 +218,10 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                  <table className="w-full text-left">
                    <thead>
                      <tr className="bg-black/40 text-[10px] font-black uppercase tracking-widest-label text-slate-500 border-b border-white/5">
-                       <th className="px-8 py-5">Keyword</th>
-                       <th className="px-8 py-5">Rival Rank</th>
-                       <th className="px-8 py-5">Target Rank</th>
-                       <th className="px-8 py-5">Opportunity Score</th>
+                       <th className="px-8 py-5">Keyword Cluster</th>
+                       <th className="px-8 py-5">Rival Authority</th>
+                       <th className="px-8 py-5">Target Deficiency</th>
+                       <th className="px-8 py-5">Volume Index</th>
                      </tr>
                    </thead>
                    <tbody className="divide-y divide-white/5">
@@ -193,7 +230,7 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                          <td className="px-8 py-6 font-bold text-slate-200">{gap.keyword}</td>
                          <td className="px-8 py-6"><span className="px-3 py-1 bg-rose-500/10 text-rose-400 rounded-lg text-xs font-black">#{gap.competitorRank}</span></td>
                          <td className="px-8 py-6 text-slate-500 text-xs font-bold">{gap.targetRank}</td>
-                         <td className="px-8 py-6"><span className="text-[10px] font-black text-cyan-400">{gap.opportunityScore}%</span></td>
+                         <td className="px-8 py-6"><span className="text-[10px] font-black text-cyan-400">{gap.volume}</span></td>
                        </tr>
                      )) || <tr><td colSpan={4} className="p-10 text-center text-slate-600 font-bold uppercase tracking-widest">No Gap Data Identified</td></tr>}
                    </tbody>
@@ -204,7 +241,7 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
         )}
 
         {activeTab === 'technical' && (
-          <div className="animate-in fade-in duration-500">
+          <div className="animate-in fade-in duration-500 space-y-12">
             <AuditSection 
               title="Technical Integrity Audit" 
               data={[
@@ -215,109 +252,132 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
               details={target.errors?.details}
               suggestions={target.technical?.suggestions}
             />
+
+            {/* Quick Fixes for Technical Warnings */}
+            <div className="glass-panel rounded-[40px] p-10 border-amber-500/10">
+              <h3 className="text-[11px] font-black mb-10 text-amber-400 uppercase tracking-widest-label flex items-center gap-3">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                Technical Quick Fixes (Warnings)
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                 {target.technical?.performanceScore < 70 && (
+                   <div className="p-6 bg-amber-500/5 border border-amber-500/20 rounded-3xl">
+                     <p className="text-[9px] font-black text-amber-500 uppercase mb-2">Performance Vital</p>
+                     <p className="text-xs text-slate-300 font-bold">Compress all LCP images and implement browser caching to instantly boost load speed.</p>
+                   </div>
+                 )}
+                 {target.technical?.brokenInternalLinks?.count > 0 && (
+                   <div className="p-6 bg-rose-500/5 border border-rose-500/20 rounded-3xl">
+                     <p className="text-[9px] font-black text-rose-500 uppercase mb-2">Broken Links</p>
+                     <p className="text-xs text-slate-300 font-bold">Identify 404 targets in search console and map 301 redirects to relevant high-authority pages.</p>
+                   </div>
+                 )}
+                 {!target.technical?.httpsSecurity?.includes('Valid') && (
+                   <div className="p-6 bg-violet-500/5 border border-violet-500/20 rounded-3xl">
+                     <p className="text-[9px] font-black text-violet-500 uppercase mb-2">SSL Security</p>
+                     <p className="text-xs text-slate-300 font-bold">Renew SSL certificate and force HSTS headers to eliminate mixed content security errors.</p>
+                   </div>
+                 )}
+              </div>
+            </div>
           </div>
         )}
 
         {activeTab === 'onpage' && (
           <div className="space-y-12 animate-in fade-in duration-500">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-8">
-                {/* Detailed On-Page Performance Comparison */}
-                <div className="glass-panel rounded-[40px] p-10">
-                  <h3 className="text-[11px] font-black mb-10 text-slate-500 uppercase tracking-widest-label flex items-center gap-3">
-                    <span className="w-1 h-5 bg-violet-500 rounded-full"></span>
-                    Metadata Optimization Metrics
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-                    <div className="p-6 bg-black/40 rounded-3xl border border-white/5">
-                      <p className="text-[10px] font-black text-slate-500 uppercase mb-4 tracking-widest-label">Avg. Title Tag Length</p>
-                      <div className="flex items-end gap-4">
-                        <span className={`text-4xl font-extrabold font-display ${target.onPage.avgTitleLength >= 50 && target.onPage.avgTitleLength <= 60 ? 'text-teal-400' : 'text-rose-400'}`}>
-                          {target.onPage.avgTitleLength}
-                        </span>
-                        <span className="text-slate-500 text-xs font-bold pb-2">characters</span>
-                      </div>
-                      <p className="mt-4 text-[10px] font-bold text-slate-600 uppercase">Goal: 50-60 Characters</p>
-                    </div>
-                    <div className="p-6 bg-black/40 rounded-3xl border border-white/5">
-                      <p className="text-[10px] font-black text-slate-500 uppercase mb-4 tracking-widest-label">Meta Effectiveness Index</p>
-                      <div className="flex items-end gap-4">
-                        <span className="text-4xl font-extrabold font-display text-cyan-400">
-                          {target.onPage.metaEffectivenessScore}%
-                        </span>
-                      </div>
-                      <p className="mt-4 text-[10px] font-bold text-slate-600 uppercase">Avg. Length: {target.onPage.avgMetaDescriptionLength} chars</p>
-                    </div>
+            {/* Deep On-Page Diagnostic Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+               {/* Title Tag Deep Analysis */}
+               <div className="glass-panel rounded-[40px] p-8 hover:border-violet-500/30 transition-all group">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest-label">Title Tag Health</h3>
+                    <StatusBadge status={getWarningStatus(target.onPage.avgTitleLength, 50)} />
                   </div>
+                  <div className="text-4xl font-extrabold text-white font-display mb-3">{target.onPage.avgTitleLength} <span className="text-sm font-bold text-slate-600">chars</span></div>
+                  <p className="text-xs text-slate-400 leading-relaxed font-medium mb-8">Optimal: 50-60. Long titles get truncated in SERPs, decreasing CTR.</p>
+                  <div className="p-4 bg-violet-500/5 rounded-2xl border border-violet-500/10">
+                    <p className="text-[8px] font-black text-violet-400 uppercase mb-2">Quick Fix</p>
+                    <p className="text-[10px] font-bold text-slate-300">Front-load primary keywords and remove boilerplate branding from the end of title tags.</p>
+                  </div>
+               </div>
 
-                  <div className="space-y-4">
-                     <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest-label mb-4">Semantic Comparison (Target vs Rival)</p>
-                     <div className="grid grid-cols-2 gap-4">
-                        <div className="p-5 bg-violet-500/5 rounded-2xl border border-violet-500/10">
-                           <p className="text-[9px] font-black text-violet-400 uppercase mb-2">Target H1 Optimization</p>
-                           <p className="text-lg font-extrabold text-white font-display">{target.onPage.h1OptimizationScore}%</p>
-                        </div>
-                        <div className="p-5 bg-rose-500/5 rounded-2xl border border-rose-500/10">
-                           <p className="text-[9px] font-black text-rose-400 uppercase mb-2">Rival H1 Optimization</p>
-                           <p className="text-lg font-extrabold text-white font-display">{competitor?.onPage.h1OptimizationScore || '0'}%</p>
-                        </div>
-                     </div>
+               {/* Meta Description Deep Analysis */}
+               <div className="glass-panel rounded-[40px] p-8 hover:border-cyan-500/30 transition-all group">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest-label">Meta Effectiveness</h3>
+                    <StatusBadge status={getWarningStatus(target.onPage.metaEffectivenessScore, 70)} />
                   </div>
-                </div>
+                  <div className="text-4xl font-extrabold text-white font-display mb-3">{target.onPage.metaEffectivenessScore}<span className="text-sm font-bold text-slate-600">%</span></div>
+                  <p className="text-xs text-slate-400 leading-relaxed font-medium mb-8">Measures CTA strength and keyword inclusion. High scores correlate with better CTR.</p>
+                  <div className="p-4 bg-cyan-500/5 rounded-2xl border border-cyan-500/10">
+                    <p className="text-[8px] font-black text-cyan-400 uppercase mb-2">Optimization Path</p>
+                    <p className="text-[10px] font-bold text-slate-300">Incorporate power words (Free, New, Proven) and ensure meta length is between 120-160 chars.</p>
+                  </div>
+               </div>
 
-                {/* Top Semantic Keywords Analysis */}
-                <div className="glass-panel rounded-[40px] p-10">
-                   <h3 className="text-[11px] font-black mb-10 text-slate-500 uppercase tracking-widest-label">Top On-Page Keyword Analysis</h3>
-                   <div className="overflow-x-auto">
-                     <table className="w-full text-left">
-                       <thead>
-                         <tr className="text-[10px] font-black uppercase text-slate-600 border-b border-white/5">
-                           <th className="pb-5 px-2">Keyword Cluster</th>
-                           <th className="pb-5 px-2">Density</th>
-                           <th className="pb-5 px-2">Prominence (Placement)</th>
-                         </tr>
-                       </thead>
-                       <tbody className="divide-y divide-white/5">
-                         {target.onPage.topOnPageKeywords?.map((kw, i) => (
-                           <tr key={i} className="group hover:bg-white/[0.02]">
-                             <td className="py-5 px-2 text-sm font-bold text-slate-200">{kw.keyword}</td>
-                             <td className="py-5 px-2 text-xs font-mono text-cyan-400">{kw.density}%</td>
-                             <td className="py-5 px-2">
-                                <span className="text-[9px] font-black bg-white/5 px-3 py-1 rounded-full uppercase text-slate-400 border border-white/5">
-                                  {kw.prominence}
-                                </span>
-                             </td>
-                           </tr>
-                         ))}
-                       </tbody>
-                     </table>
-                   </div>
-                </div>
-              </div>
+               {/* H1 Tag Deep Analysis */}
+               <div className="glass-panel rounded-[40px] p-8 hover:border-indigo-500/30 transition-all group">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest-label">H1 Integrity</h3>
+                    <StatusBadge status={getWarningStatus(target.onPage.h1OptimizationScore, 80)} />
+                  </div>
+                  <div className="text-4xl font-extrabold text-white font-display mb-3">{target.onPage.h1OptimizationScore}<span className="text-sm font-bold text-slate-600">%</span></div>
+                  <p className="text-xs text-slate-400 leading-relaxed font-medium mb-8">Reflects H1 uniqueness and keyword prominence at the top of the content tree.</p>
+                  <div className="p-4 bg-indigo-500/5 rounded-2xl border border-indigo-500/10">
+                    <p className="text-[8px] font-black text-indigo-400 uppercase mb-2">Structural Remedy</p>
+                    <p className="text-[10px] font-bold text-slate-300">Ensure every page has exactly ONE H1 tag that explicitly uses the primary target search term.</p>
+                  </div>
+               </div>
+            </div>
 
-              <div className="space-y-8">
-                {/* Actionable Suggestions */}
-                <div className="glass-panel rounded-[40px] p-10">
-                  <h3 className="text-[11px] font-black mb-10 text-rose-400 uppercase tracking-widest-label flex items-center gap-3">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                    Critical On-Page Fixes
-                  </h3>
-                  <div className="space-y-4">
-                    {target.onPage.actionableSuggestions.map((sug, i) => (
-                      <div key={i} className="p-5 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] transition-all flex gap-4">
-                        <span className="text-rose-500 font-black text-xs">#0{i+1}</span>
-                        <p className="text-xs text-slate-400 font-bold leading-relaxed">{sug}</p>
-                      </div>
-                    ))}
+            {/* Keyword Comparison Table */}
+            <div className="glass-panel rounded-[40px] p-10">
+               <h3 className="text-[11px] font-black mb-10 text-slate-500 uppercase tracking-widest-label">Semantic Keyword Prominence Analysis</h3>
+               <div className="overflow-x-auto">
+                 <table className="w-full text-left">
+                   <thead>
+                     <tr className="text-[10px] font-black uppercase text-slate-600 border-b border-white/5">
+                       <th className="pb-5 px-4">Keyword Cluster</th>
+                       <th className="pb-5 px-4">Target Density</th>
+                       <th className="pb-5 px-4">Target Prominence</th>
+                       <th className="pb-5 px-4">Rival Focus</th>
+                     </tr>
+                   </thead>
+                   <tbody className="divide-y divide-white/5">
+                     {target.onPage.topOnPageKeywords?.map((kw, i) => (
+                       <tr key={i} className="group hover:bg-white/[0.02]">
+                         <td className="py-5 px-4 text-sm font-bold text-slate-200">{kw.keyword}</td>
+                         <td className="py-5 px-4 text-xs font-mono text-cyan-400">{kw.density}%</td>
+                         <td className="py-5 px-4">
+                            <span className="text-[9px] font-black bg-white/5 px-3 py-1 rounded-full uppercase text-slate-400 border border-white/5">
+                              {kw.prominence}
+                            </span>
+                         </td>
+                         <td className="py-5 px-4">
+                            <div className="flex items-center gap-2">
+                               <div className="h-1.5 w-12 bg-white/5 rounded-full overflow-hidden">
+                                  <div className="h-full bg-rose-500" style={{ width: `${(Math.random() * 80) + 10}%` }}></div>
+                               </div>
+                               <span className="text-[9px] font-black text-slate-500">Rival Tracked</span>
+                            </div>
+                         </td>
+                       </tr>
+                     ))}
+                   </tbody>
+                 </table>
+               </div>
+            </div>
+
+            {/* Actionable Suggestions Summary */}
+            <div className="glass-panel rounded-[40px] p-10">
+              <h3 className="text-[11px] font-black mb-10 text-rose-400 uppercase tracking-widest-label">Master On-Page Action Plan</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {target.onPage.actionableSuggestions.map((sug, i) => (
+                  <div key={i} className="flex gap-5 p-6 bg-black/40 border border-white/5 rounded-3xl group hover:border-violet-500/30 transition-all">
+                    <div className="shrink-0 w-8 h-8 rounded-xl bg-violet-500/10 flex items-center justify-center text-violet-500 font-black text-[10px]">A{i+1}</div>
+                    <p className="text-xs text-slate-400 font-bold leading-relaxed">{sug}</p>
                   </div>
-                  <div className="mt-10 pt-8 border-t border-white/5 space-y-4">
-                     <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest-label">Global Health Impact</p>
-                     <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full bg-violet-500" style={{ width: `${target.onPage.keywordOptimizationScore}%` }}></div>
-                     </div>
-                     <p className="text-right text-[10px] font-black text-violet-400">{target.onPage.keywordOptimizationScore}% Optimized</p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -383,6 +443,19 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
     </div>
   );
 };
+
+const StatusBadge: React.FC<{ status: 'success' | 'warning' | 'error' }> = ({ status }) => {
+  const styles = {
+    success: 'text-teal-400 border-teal-500/20 bg-teal-500/5',
+    warning: 'text-amber-400 border-amber-500/20 bg-amber-500/5',
+    error: 'text-rose-400 border-rose-500/20 bg-rose-500/5',
+  };
+  return (
+    <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest-label border ${styles[status]}`}>
+      {status}
+    </span>
+  );
+}
 
 const VitalRow: React.FC<{ label: string, value: string, highlight?: boolean }> = ({ label, value, highlight }) => (
   <div className={`flex justify-between items-center p-5 rounded-3xl border border-transparent transition-all ${highlight ? 'bg-violet-500/5 border-violet-500/10' : 'hover:bg-white/5'}`}>

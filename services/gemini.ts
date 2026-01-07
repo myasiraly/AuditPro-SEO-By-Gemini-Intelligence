@@ -22,13 +22,16 @@ export class GeminiService {
       ${competitorInstruction}
       
       CORE ANALYTICS REQUIREMENTS:
-      1. ON-PAGE DEEP DIVE: Analyze Title Tag lengths (ideally 50-60 chars), Meta Description effectiveness/length (120-160 chars), and H1 tag usage patterns.
-      2. KEYWORD USAGE: Extract top 5 semantic keywords for each site, their density, and prominence (placement in H1/Title).
-      3. COMPARISON: Provide clear delta between Target and Competitor on-page strategies.
-      4. ACTIONABLE SUGGESTIONS: Specifically provide improvements for Title, Meta, and H1 tags based on findings.
-      5. TECHNICAL & COMPETITIVE: Standard health scores, traffic, PPC spend, and keyword gaps.
-      
-      STRICT JSON SCHEMA REQUIRED. Ensure all numeric values are integers or floats.
+      1. ON-PAGE PRECISION: 
+         - Analyze Title Tag lengths. Provide specific fixes if not 50-60 chars.
+         - Evaluate Meta Description effectiveness (compelling CTA, keyword inclusion). Provide 3 concrete rewrites.
+         - Audit H1 usage (is it unique? does it contain the primary keyword?).
+      2. SEMANTIC KEYWORD DELTA: Compare Target vs Competitor on keyword density and prominence.
+      3. TECHNICAL QUICK FIXES: Identify potential "warnings" (performance < 70, broken links, missing HTTPS) and provide 1-sentence instant technical remedies.
+      4. PPC & MARKET INTEL: Estimate rival's monthly PPC budget, their high-intent "Golden Keywords," and their content strategy velocity.
+      5. STRATEGIC INSIGHT: Provide 3 "Outranking Tactics" specifically designed to steal traffic from the competitor.
+
+      STRICT JSON SCHEMA REQUIRED.
     `;
 
     const response = await ai.models.generateContent({
@@ -121,6 +124,7 @@ export class GeminiService {
                         estimatedPpcValue: { type: Type.STRING },
                         marketPosition: { type: Type.STRING },
                         contentVelocity: { type: Type.STRING },
+                        tacticalRecommendations: { type: Type.ARRAY, items: { type: Type.STRING } },
                         keywordOverlap: { type: Type.OBJECT, properties: { shared: { type: Type.NUMBER }, targetUnique: { type: Type.NUMBER }, competitorUnique: { type: Type.NUMBER } } },
                         serpFeatures: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { feature: { type: Type.STRING }, ownedByTarget: { type: Type.BOOLEAN }, ownedByCompetitor: { type: Type.BOOLEAN } } } },
                         ppcIntel: {
