@@ -17,38 +17,13 @@ const Auth: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<React.ReactNode | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [resetSent, setResetSent] = useState(false);
-
-  const formatError = (err: any) => {
-    switch (err.code) {
-      case 'auth/unauthorized-domain':
-        return (
-          <div className="space-y-2">
-            <p>This domain is not authorized in Firebase.</p>
-            <p className="text-[10px] opacity-80 leading-relaxed font-medium">
-              Go to <span className="text-white">Firebase Console > Authentication > Settings > Authorized Domains</span> and add <span className="text-white">{window.location.hostname}</span> to the list.
-            </p>
-          </div>
-        );
-      case 'auth/popup-blocked':
-        return "Sign-in popup was blocked by your browser. Please allow popups for this site.";
-      case 'auth/popup-closed-by-user':
-        return "Sign-in was cancelled. Please try again.";
-      case 'auth/operation-not-allowed':
-        return "Google sign-in is not enabled in your Firebase project. Please enable it in the Firebase Console.";
-      case 'auth/invalid-credential':
-        return "Invalid login credentials. Please check your email and password.";
-      default:
-        return err.message || "An authentication error occurred.";
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-
     try {
       if (view === 'forgot-password') {
         await sendPasswordResetEmail(auth, email);
@@ -59,8 +34,7 @@ const Auth: React.FC = () => {
         await createUserWithEmailAndPassword(auth, email, password);
       }
     } catch (err: any) {
-      console.error(err);
-      setError(formatError(err));
+      setError(err.message || "Authentication failed. Please check your credentials.");
     } finally {
       setIsLoading(false);
     }
@@ -68,182 +42,154 @@ const Auth: React.FC = () => {
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
-    setError(null);
     try {
-      // Using the explicit browserPopupRedirectResolver ensures compatibility 
-      // when running inside nested iframes or specific dev environments.
       await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver);
     } catch (err: any) {
-      console.error("Google Auth Error:", err);
-      setError(formatError(err));
+      setError("Google authentication failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-950 relative overflow-hidden font-body">
-      {/* Background Decor */}
-      <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600 rounded-full blur-[120px]"></div>
+    <div className="min-h-screen flex items-center justify-center p-6 bg-[#02040a] relative overflow-hidden font-display">
+      {/* Refined Sophisticated Background */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-violet-600/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/5 blur-[120px] rounded-full"></div>
       </div>
       
-      <div className="w-full max-w-md relative z-10 animate-in fade-in zoom-in-95 duration-700">
+      <div className="w-full max-w-[440px] relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        {/* Brand Identity */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 p-4 rounded-2xl shadow-2xl shadow-blue-500/20 mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-2xl shadow-violet-500/20 mb-6 mx-auto">
             <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </div>
-          <h1 className="text-3xl font-extrabold font-display tracking-tight text-white mb-2">
-            AuditPro <span className="text-blue-500">SEO</span>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white mb-2">
+            AuditPro <span className="text-violet-400">SEO</span>
           </h1>
-          <p className="text-slate-400 font-medium">Access your intelligence dashboard</p>
+          <p className="text-slate-400 text-sm font-medium">Professional Search Intelligence Dashboard</p>
         </div>
 
-        <div className="bg-slate-900/50 backdrop-blur-xl border border-white/5 rounded-[32px] p-8 shadow-2xl">
-          {view !== 'forgot-password' ? (
-            <div className="flex bg-slate-950/50 p-1 rounded-xl mb-8 border border-white/5">
-              <button 
-                onClick={() => { setView('login'); setError(null); }}
-                className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest-label rounded-lg transition-all ${view === 'login' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-500 hover:text-slate-300'}`}
-              >
-                Login
-              </button>
-              <button 
-                onClick={() => { setView('signup'); setError(null); }}
-                className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest-label rounded-lg transition-all ${view === 'signup' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-500 hover:text-slate-300'}`}
-              >
-                Sign Up
-              </button>
-            </div>
-          ) : (
-            <div className="mb-8">
-              <button 
-                onClick={() => { setView('login'); setResetSent(false); setError(null); }}
-                className="flex items-center gap-2 text-[10px] font-black text-blue-500 uppercase tracking-widest-label hover:text-blue-400 transition-colors"
-              >
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
-                </svg>
-                Back to Login
-              </button>
-              <h2 className="text-xl font-bold font-display text-white mt-4">Reset Password</h2>
-              <p className="text-xs text-slate-500 mt-2 font-medium">We'll send a recovery link to your email.</p>
-            </div>
-          )}
+        {/* Auth Card */}
+        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[32px] p-8 md:p-10 shadow-3xl">
+          
+          {/* Tab Switcher */}
+          <div className="flex bg-black/40 p-1 rounded-xl mb-10 border border-white/5">
+            <button 
+              onClick={() => { setView('login'); setError(null); }}
+              className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all duration-300 ${view === 'login' ? 'bg-violet-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}
+            >
+              Sign In
+            </button>
+            <button 
+              onClick={() => { setView('signup'); setError(null); }}
+              className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all duration-300 ${view === 'signup' ? 'bg-violet-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}
+            >
+              Create Account
+            </button>
+          </div>
 
-          {resetSent ? (
-            <div className="text-center py-6 animate-in fade-in zoom-in-95">
-              <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
-                <svg className="w-8 h-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <p className="text-emerald-400 font-bold font-display text-sm">Reset Link Sent!</p>
-              <p className="text-slate-500 text-xs mt-2 font-medium">Check your inbox for further instructions.</p>
-              <button 
-                onClick={() => { setView('login'); setResetSent(false); }}
-                className="mt-6 text-[10px] font-black text-slate-400 uppercase tracking-widest-label hover:text-white transition-colors underline decoration-slate-800 underline-offset-4"
-              >
-                Return to Sign In
-              </button>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                Email Address
+              </label>
+              <input 
+                type="email" 
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@company.com"
+                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-sm font-medium focus:outline-none focus:border-violet-500/50 focus:ring-4 focus:ring-violet-500/5 transition-all placeholder:text-slate-700 text-white"
+              />
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-[11px] text-rose-400 font-bold mb-4 animate-in fade-in slide-in-from-top-1">
-                  {error}
-                </div>
-              )}
-              
+            
+            {view !== 'forgot-password' && (
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest-label ml-1">Email Address</label>
+                <div className="flex justify-between items-center ml-1">
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                    Password
+                  </label>
+                  <button 
+                    type="button"
+                    onClick={() => setView('forgot-password')}
+                    className="text-[11px] font-bold text-violet-400 hover:text-violet-300 transition-colors"
+                  >
+                    Forgot?
+                  </button>
+                </div>
                 <input 
-                  type="email" 
+                  type="password" 
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@company.com"
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-slate-700"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-sm font-medium focus:outline-none focus:border-violet-500/50 focus:ring-4 focus:ring-violet-500/5 transition-all placeholder:text-slate-700 text-white"
                 />
               </div>
-              
-              {view !== 'forgot-password' && (
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest-label ml-1">Password</label>
-                    <button 
-                      type="button"
-                      onClick={() => setView('forgot-password')}
-                      className="text-[10px] font-black text-blue-500 uppercase tracking-widest-label hover:text-blue-400 transition-colors"
-                    >
-                      Forgot?
-                    </button>
-                  </div>
-                  <input 
-                    type="password" 
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-slate-700"
-                  />
-                </div>
-              )}
-              
-              <button 
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-bold py-3.5 rounded-xl transition-all shadow-xl shadow-blue-600/20 uppercase text-xs tracking-widest-label mt-2"
-              >
-                {isLoading ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span>{view === 'forgot-password' ? 'Sending...' : 'Authenticating...'}</span>
-                  </div>
-                ) : (
-                  view === 'forgot-password' ? 'Send Reset Link' : view === 'login' ? 'Sign In to Dashboard' : 'Create Account'
-                )}
-              </button>
-            </form>
-          )}
-
-          {view !== 'forgot-password' && (
-            <>
-              <div className="relative my-8">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/5"></div>
-                </div>
-                <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-widest-label">
-                  <span className="bg-[#0f172a] px-4 text-slate-600">Or continue with</span>
-                </div>
+            )}
+            
+            {error && (
+              <div className="px-4 py-3 bg-rose-500/10 border border-rose-500/20 rounded-xl">
+                <p className="text-rose-400 text-xs font-semibold text-center leading-relaxed">
+                  {error}
+                </p>
               </div>
+            )}
 
-              <button 
-                onClick={handleGoogleLogin}
-                disabled={isLoading}
-                className="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-3 uppercase text-xs tracking-widest-label shadow-xl shadow-white/5 active:scale-[0.98] disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <div className="w-5 h-5 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin"></div>
-                ) : (
-                  <svg className="w-5 h-5" viewBox="0 0 48 48">
-                    <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
-                    <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
-                    <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
-                    <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
-                  </svg>
-                )}
-                {isLoading ? 'Verifying...' : 'Login with Google'}
-              </button>
-            </>
-          )}
+            {resetSent && (
+              <div className="px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                <p className="text-emerald-400 text-xs font-semibold text-center">
+                  Password reset link has been sent.
+                </p>
+              </div>
+            )}
+            
+            <button 
+              type="submit"
+              disabled={isLoading}
+              className="w-full btn-primary text-white font-bold py-4 rounded-xl transition-all shadow-xl shadow-violet-500/20 active:scale-[0.98] text-sm"
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>Processing...</span>
+                </div>
+              ) : (
+                view === 'login' ? 'Sign In to Dashboard' : view === 'signup' ? 'Create Your Account' : 'Reset Password'
+              )}
+            </button>
+          </form>
+
+          <div className="relative my-8">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/10"></div>
+            </div>
+            <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
+              <span className="bg-[#0f111a] px-4 text-slate-500">Or continue with</span>
+            </div>
+          </div>
+
+          <button 
+            onClick={handleGoogleLogin}
+            disabled={isLoading}
+            className="w-full bg-white text-slate-900 font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-3 text-sm hover:bg-slate-100 active:scale-[0.98] shadow-lg shadow-white/5"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 48 48">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+            </svg>
+            Sign in with Google
+          </button>
         </div>
-        
-        <p className="mt-8 text-center text-slate-600 text-[10px] font-bold uppercase tracking-widest-label">
-          By continuing, you agree to AuditPro's Terms of Intelligence.
+
+        <p className="mt-8 text-center text-slate-500 text-xs font-medium">
+          By continuing, you agree to our <span className="text-slate-300 underline cursor-pointer hover:text-white">Terms of Service</span> and <span className="text-slate-300 underline cursor-pointer hover:text-white">Privacy Policy</span>.
         </p>
       </div>
     </div>

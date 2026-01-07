@@ -1,4 +1,35 @@
 
+export interface GroundingSource {
+  title: string;
+  uri: string;
+}
+
+export interface CompetitiveIntelligence {
+  estimatedPpcValue: string;
+  serpFeatures: { feature: string; ownedByTarget: boolean; ownedByCompetitor: boolean }[];
+  contentVelocity: string;
+  keywordOverlap: {
+    shared: number;
+    targetUnique: number;
+    competitorUnique: number;
+  };
+  marketPosition: 'Leader' | 'Challenger' | 'Niche' | 'Laggard';
+  tacticalRecommendations: string[];
+  ppcIntel?: {
+    estimatedMonthlySpend: string;
+    adStrategy: string;
+    topPaidKeywords: { keyword: string; cpc: string; position: number }[];
+  };
+  keywordGaps?: {
+    keyword: string;
+    targetRank: string;
+    competitorRank: number;
+    volume: string;
+    intent: string;
+    opportunityScore: number;
+  }[];
+}
+
 export interface SEOAuditData {
   url: string;
   totalPages: number;
@@ -41,13 +72,24 @@ export interface SEOAuditData {
   onPage: {
     missingTitles: number;
     duplicateTitles: number;
+    avgTitleLength: number;
     missingMetaDescriptions: number;
+    avgMetaDescriptionLength: number;
+    metaEffectivenessScore: number;
     missingH1s: number;
+    h1OptimizationScore: number;
     keywordOptimizationScore: number;
     actionableSuggestions: string[];
+    topOnPageKeywords: { keyword: string; density: number; prominence: string }[];
   };
   organicIntel: {
-    topKeywords: string[];
+    estimatedMonthlyTraffic: number;
+    topKeywords: {
+      keyword: string;
+      volume: string;
+      difficulty: number;
+      intent: string;
+    }[];
     topPages: string[];
     gapAnalysis: {
       topic: string;
@@ -55,12 +97,13 @@ export interface SEOAuditData {
       competitorUrl: string;
     }[];
     frequentTopics: string[];
-    serpAnalysis?: {
-      query: string;
-      targetRank: number;
-      competitorRank: number;
-      topCompetitor: string;
-    }[];
+    competitorContentAnalysis?: {
+      contentTypes: { type: string; frequency: string; performance: string }[];
+      topPerformingContent: { title: string; url: string; strength: string }[];
+      contentStrategy: string;
+      winningTopics: string[];
+    };
+    competitiveIntelligence?: CompetitiveIntelligence;
   };
   images: {
     overSizeLimit: number;
@@ -83,6 +126,7 @@ export interface SEOAuditData {
     toxicLinks: number;
     referringDomains: number;
     topReferringDomains: string[];
+    highValueTargetLinks?: string[];
   };
 }
 
@@ -111,4 +155,5 @@ export interface AuditResult {
   target: SEOAuditData;
   competitor?: SEOAuditData;
   swot: SWOTAnalysis;
+  sources?: GroundingSource[];
 }

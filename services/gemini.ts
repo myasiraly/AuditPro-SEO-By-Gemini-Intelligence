@@ -1,213 +1,145 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { AuditResult, ContentPlan, BlogPost } from "../types";
+import { AuditResult, ContentPlan, BlogPost, GroundingSource } from "../types";
 
 export class GeminiService {
-  private ai: GoogleGenAI;
-
-  constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
+  private cleanJson(text: string | undefined): string {
+    if (!text) return '{}';
+    return text.replace(/```json/g, "").replace(/```/g, "").trim();
   }
 
   async performSEOAudit(targetUrl: string, competitorUrl?: string): Promise<AuditResult> {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    
+    const competitorInstruction = competitorUrl 
+      ? `STRICT REQUIREMENT: Perform a direct head-to-head deep analysis against: ${competitorUrl}.`
+      : `STRICT REQUIREMENT: Auto-identify the strongest organic search rival for ${targetUrl} and analyze them.`;
+
     const prompt = `
-      Act as a Senior SEO Expert and Market Research Analyst. Perform an exhaustive deep-dive SEO audit for the target site: ${targetUrl} 
-      ${competitorUrl ? `benchmarked against the competitor: ${competitorUrl}.` : ''}
+      Act as a Lead SEO Intelligence Analyst. Execute a high-fidelity audit comparing the TARGET and COMPETITOR.
       
-      CRITICAL INSTRUCTIONS:
-      1. USE GOOGLE SEARCH GROUNDING: Find real-world organic ranking data, top performing pages, and keyword sets for both domains.
-      2. CRAWL POLICY: Simulate a polite crawl using logic equivalent to "time.sleep(2)" between requests to avoid detection.
-      3. ORGANIC INTEL: 
-         - Identify Top 10 performing pages for both sites.
-         - Identify Top 10 organic keywords for both sites.
-         - Identify frequent topics in the competitor's blog/resources section.
-      4. ON-PAGE SEO FIXES: Provide specific, actionable suggestions for improving title tag lengths (aim for 50-60 chars), meta description effectiveness (compelling CTAs, 150-160 chars), and H1 usage (semantic uniqueness).
-      5. GAP ANALYSIS: Find 3 high-intent topics covered by ${competitorUrl} that ${targetUrl} is missing.
-      6. SERP ANALYSIS: For the primary keywords, provide ranking estimates comparing target vs competitor.
-      7. TECHNICAL: Identify broken links (internal/external), redirect chains, and performance scores.
+      TARGET: ${targetUrl}
+      ${competitorInstruction}
       
-      The response MUST be strictly valid JSON according to the requested schema.
+      CORE ANALYTICS REQUIREMENTS:
+      1. ON-PAGE DEEP DIVE: Analyze Title Tag lengths (ideally 50-60 chars), Meta Description effectiveness/length (120-160 chars), and H1 tag usage patterns.
+      2. KEYWORD USAGE: Extract top 5 semantic keywords for each site, their density, and prominence (placement in H1/Title).
+      3. COMPARISON: Provide clear delta between Target and Competitor on-page strategies.
+      4. ACTIONABLE SUGGESTIONS: Specifically provide improvements for Title, Meta, and H1 tags based on findings.
+      5. TECHNICAL & COMPETITIVE: Standard health scores, traffic, PPC spend, and keyword gaps.
+      
+      STRICT JSON SCHEMA REQUIRED. Ensure all numeric values are integers or floats.
     `;
 
-    const response = await this.ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+    const response = await ai.models.generateContent({
+      model: "gemini-3-pro-preview",
       contents: prompt,
       config: {
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
+          required: ["target", "swot"],
           properties: {
             target: {
               type: Type.OBJECT,
               properties: {
                 url: { type: Type.STRING },
-                totalPages: { type: Type.NUMBER },
                 healthScore: { type: Type.NUMBER },
-                errors: {
-                  type: Type.OBJECT,
-                  properties: {
-                    count: { type: Type.NUMBER },
-                    details: { type: Type.ARRAY, items: { type: Type.STRING } }
-                  }
-                },
-                warnings: {
-                  type: Type.OBJECT,
-                  properties: {
-                    count: { type: Type.NUMBER },
-                    details: { type: Type.ARRAY, items: { type: Type.STRING } }
-                  }
-                },
-                notices: {
-                  type: Type.OBJECT,
-                  properties: {
-                    count: { type: Type.NUMBER },
-                    details: { type: Type.ARRAY, items: { type: Type.STRING } }
-                  }
-                },
-                technical: {
-                  type: Type.OBJECT,
-                  properties: {
-                    redirectChains: { type: Type.NUMBER },
-                    robotsTxtStatus: { type: Type.STRING },
-                    httpsSecurity: { type: Type.STRING },
-                    mixedContent: { type: Type.BOOLEAN },
-                    mixedContentUrls: { type: Type.ARRAY, items: { type: Type.STRING } },
-                    suggestions: { type: Type.ARRAY, items: { type: Type.STRING } },
-                    mobileFriendly: { type: Type.BOOLEAN },
-                    performanceScore: { type: Type.NUMBER },
-                    brokenInternalLinks: {
-                      type: Type.OBJECT,
-                      properties: {
-                        count: { type: Type.NUMBER },
-                        list: { type: Type.ARRAY, items: { type: Type.STRING } }
-                      }
-                    },
-                    brokenExternalLinks: {
-                      type: Type.OBJECT,
-                      properties: {
-                        count: { type: Type.NUMBER },
-                        list: { type: Type.ARRAY, items: { type: Type.STRING } }
-                      }
-                    },
-                    internalLinking: {
-                      type: Type.OBJECT,
-                      properties: {
-                        orphanPagesCount: { type: Type.NUMBER },
-                        orphanPagesList: { type: Type.ARRAY, items: { type: Type.STRING } },
-                        internalLinkScore: { type: Type.NUMBER }
-                      }
-                    }
-                  }
-                },
                 onPage: {
                   type: Type.OBJECT,
                   properties: {
                     missingTitles: { type: Type.NUMBER },
                     duplicateTitles: { type: Type.NUMBER },
+                    avgTitleLength: { type: Type.NUMBER },
                     missingMetaDescriptions: { type: Type.NUMBER },
+                    avgMetaDescriptionLength: { type: Type.NUMBER },
+                    metaEffectivenessScore: { type: Type.NUMBER },
                     missingH1s: { type: Type.NUMBER },
+                    h1OptimizationScore: { type: Type.NUMBER },
                     keywordOptimizationScore: { type: Type.NUMBER },
-                    actionableSuggestions: { type: Type.ARRAY, items: { type: Type.STRING } }
+                    actionableSuggestions: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    topOnPageKeywords: { 
+                      type: Type.ARRAY, 
+                      items: { 
+                        type: Type.OBJECT, 
+                        properties: { 
+                          keyword: { type: Type.STRING }, 
+                          density: { type: Type.NUMBER }, 
+                          prominence: { type: Type.STRING } 
+                        } 
+                      } 
+                    }
                   }
                 },
                 organicIntel: {
                   type: Type.OBJECT,
                   properties: {
-                    topKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
-                    topPages: { type: Type.ARRAY, items: { type: Type.STRING } },
-                    gapAnalysis: {
-                      type: Type.ARRAY,
-                      items: {
-                        type: Type.OBJECT,
-                        properties: {
-                          topic: { type: Type.STRING },
-                          intent: { type: Type.STRING },
-                          competitorUrl: { type: Type.STRING }
-                        }
-                      }
-                    },
-                    frequentTopics: { type: Type.ARRAY, items: { type: Type.STRING } },
-                    serpAnalysis: {
-                      type: Type.ARRAY,
-                      items: {
-                        type: Type.OBJECT,
-                        properties: {
-                          query: { type: Type.STRING },
-                          targetRank: { type: Type.NUMBER },
-                          competitorRank: { type: Type.NUMBER },
-                          topCompetitor: { type: Type.STRING }
-                        }
-                      }
-                    }
-                  }
-                },
-                images: {
-                  type: Type.OBJECT,
-                  properties: {
-                    overSizeLimit: { type: Type.NUMBER },
-                    missingAlt: { type: Type.NUMBER }
-                  }
-                },
-                content: {
-                  type: Type.OBJECT,
-                  properties: {
-                    thinContentCount: { type: Type.NUMBER },
-                    duplicateContentHashes: { type: Type.NUMBER },
-                    avgWordCount: { type: Type.NUMBER }
-                  }
-                },
-                coreWebVitals: {
-                  type: Type.OBJECT,
-                  properties: {
-                    lcp: { type: Type.STRING },
-                    fid: { type: Type.STRING },
-                    cls: { type: Type.STRING },
-                    tti: { type: Type.STRING }
+                    estimatedMonthlyTraffic: { type: Type.NUMBER },
+                    topKeywords: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { keyword: { type: Type.STRING }, volume: { type: Type.STRING }, difficulty: { type: Type.NUMBER }, intent: { type: Type.STRING } } } }
                   }
                 },
                 authority: {
                   type: Type.OBJECT,
                   properties: {
                     domainAuthority: { type: Type.NUMBER },
-                    pageRank: { type: Type.NUMBER },
-                    toxicLinks: { type: Type.NUMBER },
                     referringDomains: { type: Type.NUMBER },
                     topReferringDomains: { type: Type.ARRAY, items: { type: Type.STRING } }
                   }
-                }
-              },
-              required: ["url", "healthScore", "technical", "onPage", "authority", "organicIntel"]
+                },
+                technical: {
+                  type: Type.OBJECT,
+                  properties: { performanceScore: { type: Type.NUMBER }, suggestions: { type: Type.ARRAY, items: { type: Type.STRING } }, brokenInternalLinks: { type: Type.OBJECT, properties: { count: { type: Type.NUMBER } } }, internalLinking: { type: Type.OBJECT, properties: { internalLinkScore: { type: Type.NUMBER } } }, httpsSecurity: { type: Type.STRING } }
+                },
+                errors: { type: Type.OBJECT, properties: { details: { type: Type.ARRAY, items: { type: Type.STRING } } } }
+              }
             },
             competitor: {
               type: Type.OBJECT,
               properties: {
                 url: { type: Type.STRING },
                 healthScore: { type: Type.NUMBER },
-                technical: {
-                    type: Type.OBJECT,
-                    properties: {
-                        performanceScore: { type: Type.NUMBER },
-                        brokenInternalLinks: {
-                          type: Type.OBJECT,
-                          properties: { count: { type: Type.NUMBER } }
-                        }
-                    }
+                onPage: {
+                  type: Type.OBJECT,
+                  properties: {
+                    avgTitleLength: { type: Type.NUMBER },
+                    avgMetaDescriptionLength: { type: Type.NUMBER },
+                    metaEffectivenessScore: { type: Type.NUMBER },
+                    h1OptimizationScore: { type: Type.NUMBER },
+                    keywordOptimizationScore: { type: Type.NUMBER },
+                    topOnPageKeywords: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { keyword: { type: Type.STRING }, density: { type: Type.NUMBER }, prominence: { type: Type.STRING } } } }
+                  }
                 },
+                authority: { type: Type.OBJECT, properties: { domainAuthority: { type: Type.NUMBER }, referringDomains: { type: Type.NUMBER }, highValueTargetLinks: { type: Type.ARRAY, items: { type: Type.STRING } } } },
                 organicIntel: {
                   type: Type.OBJECT,
                   properties: {
-                    topKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
-                    topPages: { type: Type.ARRAY, items: { type: Type.STRING } },
-                    frequentTopics: { type: Type.ARRAY, items: { type: Type.STRING } }
-                  }
-                },
-                authority: {
-                  type: Type.OBJECT,
-                  properties: {
-                    domainAuthority: { type: Type.NUMBER },
-                    referringDomains: { type: Type.NUMBER },
-                    topReferringDomains: { type: Type.ARRAY, items: { type: Type.STRING } }
+                    estimatedMonthlyTraffic: { type: Type.NUMBER },
+                    competitiveIntelligence: {
+                      type: Type.OBJECT,
+                      properties: {
+                        estimatedPpcValue: { type: Type.STRING },
+                        marketPosition: { type: Type.STRING },
+                        contentVelocity: { type: Type.STRING },
+                        keywordOverlap: { type: Type.OBJECT, properties: { shared: { type: Type.NUMBER }, targetUnique: { type: Type.NUMBER }, competitorUnique: { type: Type.NUMBER } } },
+                        serpFeatures: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { feature: { type: Type.STRING }, ownedByTarget: { type: Type.BOOLEAN }, ownedByCompetitor: { type: Type.BOOLEAN } } } },
+                        ppcIntel: {
+                          type: Type.OBJECT,
+                          properties: {
+                            estimatedMonthlySpend: { type: Type.STRING },
+                            adStrategy: { type: Type.STRING },
+                            topPaidKeywords: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { keyword: { type: Type.STRING }, cpc: { type: Type.STRING }, position: { type: Type.NUMBER } } } }
+                          }
+                        },
+                        keywordGaps: {
+                          type: Type.ARRAY,
+                          items: {
+                            type: Type.OBJECT,
+                            properties: { keyword: { type: Type.STRING }, targetRank: { type: Type.STRING }, competitorRank: { type: Type.NUMBER }, volume: { type: Type.STRING }, intent: { type: Type.STRING }, opportunityScore: { type: Type.NUMBER } }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -219,27 +151,43 @@ export class GeminiService {
                 weaknesses: { type: Type.ARRAY, items: { type: Type.STRING } },
                 opportunities: { type: Type.ARRAY, items: { type: Type.STRING } },
                 threats: { type: Type.ARRAY, items: { type: Type.STRING } }
-              },
-              required: ["strengths", "weaknesses", "opportunities", "threats"]
+              }
             }
-          },
-          required: ["target", "swot"]
+          }
         }
       }
     });
 
-    return JSON.parse(response.text || '{}');
+    try {
+      const jsonStr = this.cleanJson(response.text);
+      const result = JSON.parse(jsonStr);
+      const sources: GroundingSource[] = [];
+      const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+      if (chunks) {
+        chunks.forEach((chunk: any) => {
+          if (chunk.web) {
+            sources.push({ title: chunk.web.title || "Source", uri: chunk.web.uri });
+          }
+        });
+      }
+      return { ...result, sources } as AuditResult;
+    } catch (e) {
+      console.error("JSON Analysis Error:", e);
+      throw new Error("Failed to synthesize deep SEO intelligence. Response format was invalid.");
+    }
   }
 
   async generateBlogContentPlan(audit: AuditResult): Promise<ContentPlan> {
-    const prompt = `Based on the SEO audit for ${audit.target.url}, create a 30-day blog content plan to fix weaknesses and capture opportunities. Return JSON.`;
-    const response = await this.ai.models.generateContent({
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    const prompt = `Based on the SEO audit for ${audit.target.url}, create a 30-day "Strike Plan" for 6 blog posts targeting competitor gaps. Return JSON.`;
+    const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
+          required: ["strategySummary", "posts"],
           properties: {
             strategySummary: { type: Type.STRING },
             posts: {
@@ -250,8 +198,8 @@ export class GeminiService {
                   day: { type: Type.NUMBER },
                   title: { type: Type.STRING },
                   outline: { type: Type.STRING },
-                  funnelStage: { type: Type.STRING, enum: ['TOFU', 'MOFU', 'BOFU'] },
                   targetKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  funnelStage: { type: Type.STRING },
                   suggestedWordCount: { type: Type.NUMBER }
                 }
               }
@@ -260,15 +208,16 @@ export class GeminiService {
         }
       }
     });
-    return JSON.parse(response.text || '{}');
+    return JSON.parse(this.cleanJson(response.text));
   }
 
   async writeFullBlog(post: BlogPost): Promise<string> {
-    const prompt = `Write a professional blog post for: ${post.title}. Use Markdown.`;
-    const response = await this.ai.models.generateContent({
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    const prompt = `Write a high-performance SEO blog post: ${post.title}. Use Markdown. Mention keywords: ${post.targetKeywords.join(', ')}.`;
+    const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
       contents: prompt,
     });
-    return response.text || "Failed to generate blog content.";
+    return response.text || "Generation failed.";
   }
 }
