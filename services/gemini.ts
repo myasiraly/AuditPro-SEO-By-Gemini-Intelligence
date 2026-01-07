@@ -22,14 +22,14 @@ export class GeminiService {
       ${competitorInstruction}
       
       CORE ANALYTICS REQUIREMENTS:
-      1. TRAFFIC TRENDS: Provide estimated daily traffic visits for the last 30 days for the TARGET.
-      2. TOP SEARCH KEYWORDS: Extract the top 10 most valuable organic search keywords for BOTH target and competitor. 
-         - Include Monthly Volume (e.g. "12.5K"), Keyword Difficulty (0-100), and Search Intent (Informational, Navigational, Commercial, or Transactional).
-      3. STRATEGY GAPS: Identify 4 high-level strategic gaps where the competitor is winning.
-      4. ON-PAGE PRECISION: 
-         - Analyze Title Tag lengths and Meta Description effectiveness.
-      5. PPC & MARKET INTEL: Estimate rival's monthly PPC budget and top paid keywords.
-      6. STRATEGIC INSIGHT: Provide 3 "Outranking Tactics" specifically designed to steal traffic from the competitor.
+      1. GOOGLE PAGESPEED INSIGHTS: Search for the latest Lighthouse and Core Web Vitals data for the TARGET. 
+         - Include scores (0-100) for Performance, Accessibility, Best Practices, and SEO.
+         - Include metrics: LCP (Largest Contentful Paint), FID (First Input Delay), CLS (Cumulative Layout Shift), TBT (Total Blocking Time), TTI (Time to Interactive), and Speed Index.
+      2. TRAFFIC TRENDS: Provide estimated daily traffic visits for the last 30 days for the TARGET.
+      3. TOP SEARCH KEYWORDS: Extract the top 10 most valuable organic search keywords for BOTH.
+      4. STRATEGY GAPS: Identify 4 high-level strategic gaps where the competitor is winning.
+      5. ON-PAGE PRECISION: Analyze Title Tag lengths and Meta Description effectiveness.
+      6. STRATEGIC INSIGHT: Provide 3 "Outranking Tactics".
 
       STRICT JSON SCHEMA REQUIRED. Ensure all numeric values are integers or floats.
     `;
@@ -49,6 +49,27 @@ export class GeminiService {
               properties: {
                 url: { type: Type.STRING },
                 healthScore: { type: Type.NUMBER },
+                lighthouse: {
+                  type: Type.OBJECT,
+                  properties: {
+                    performance: { type: Type.NUMBER },
+                    accessibility: { type: Type.NUMBER },
+                    bestPractices: { type: Type.NUMBER },
+                    seo: { type: Type.NUMBER }
+                  }
+                },
+                coreWebVitals: {
+                  type: Type.OBJECT,
+                  properties: {
+                    lcp: { type: Type.STRING },
+                    fid: { type: Type.STRING },
+                    cls: { type: Type.STRING },
+                    tti: { type: Type.STRING },
+                    tbt: { type: Type.STRING },
+                    speedIndex: { type: Type.STRING },
+                    assessment: { type: Type.STRING }
+                  }
+                },
                 onPage: {
                   type: Type.OBJECT,
                   properties: {

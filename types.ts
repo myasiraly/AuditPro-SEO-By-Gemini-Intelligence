@@ -48,6 +48,12 @@ export interface SEOAuditData {
   url: string;
   totalPages: number;
   healthScore: number;
+  lighthouse: {
+    performance: number;
+    accessibility: number;
+    bestPractices: number;
+    seo: number;
+  };
   errors: {
     count: number;
     details: string[];
@@ -134,6 +140,9 @@ export interface SEOAuditData {
     fid: string;
     cls: string;
     tti: string;
+    tbt: string;
+    speedIndex: string;
+    assessment: 'PASSED' | 'FAILED';
   };
   authority: {
     domainAuthority: number;

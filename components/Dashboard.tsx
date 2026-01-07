@@ -15,7 +15,7 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
   const { target, competitor, swot } = result;
-  const [activeTab, setActiveTab] = useState<'overview' | 'technical' | 'competitive' | 'keywords' | 'onpage' | 'backlinks' | 'swot' | 'blog'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'performance' | 'technical' | 'competitive' | 'keywords' | 'onpage' | 'backlinks' | 'swot' | 'blog'>('overview');
   const [contentPlan, setContentPlan] = useState<ContentPlan | null>(null);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
 
@@ -85,10 +85,10 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
         </button>
       </div>
 
-      {/* Navigation - Enhanced with flex-wrap and better visibility for all tabs */}
       <nav className="flex flex-wrap lg:flex-nowrap gap-2 bg-white/[0.03] p-2 rounded-2xl border border-white/10 sticky top-24 z-40 backdrop-blur-md overflow-x-auto no-scrollbar">
         {[
           { id: 'overview', label: 'Overview' },
+          { id: 'performance', label: 'Performance' },
           { id: 'technical', label: 'Technical' },
           { id: 'competitive', label: 'Competitive' },
           { id: 'keywords', label: 'Keywords' },
@@ -163,6 +163,55 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                 <div className="space-y-4 mt-8 pt-8 border-t border-white/5">
                   <VitalRow label="Market Status" value={competitor?.organicIntel?.competitiveIntelligence?.marketPosition || 'Challenger'} highlight />
                   <VitalRow label="Keyword Reach" value={target.organicIntel?.topKeywords?.length?.toString() || '0'} />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'performance' && (
+          <div className="space-y-12 animate-in fade-in duration-700">
+            {/* PageSpeed Insights Lighthouse Scores */}
+            <div className="glass-panel rounded-[40px] p-12">
+              <h3 className="text-[11px] font-black mb-12 text-slate-500 uppercase tracking-widest-label flex items-center gap-3">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                Google PageSpeed Insights: Lighthouse Analysis
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+                <LighthouseGauge label="Performance" value={target.lighthouse?.performance || 0} />
+                <LighthouseGauge label="Accessibility" value={target.lighthouse?.accessibility || 0} />
+                <LighthouseGauge label="Best Practices" value={target.lighthouse?.bestPractices || 0} />
+                <LighthouseGauge label="SEO" value={target.lighthouse?.seo || 0} />
+              </div>
+            </div>
+
+            {/* Core Web Vitals Field Data */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 glass-panel rounded-[40px] p-10">
+                <div className="flex justify-between items-center mb-10">
+                   <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label">Core Web Vitals Assessment</h3>
+                   <span className={`px-4 py-1 rounded-full text-[10px] font-black border ${target.coreWebVitals?.assessment === 'PASSED' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
+                     {target.coreWebVitals?.assessment || 'FAILED'}
+                   </span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                  <VitalsMetric label="Largest Contentful Paint (LCP)" value={target.coreWebVitals?.lcp || '0s'} threshold="2.5s" description="Time for the main content to load." />
+                  <VitalsMetric label="Cumulative Layout Shift (CLS)" value={target.coreWebVitals?.cls || '0'} threshold="0.1" description="Visual stability of elements." />
+                  <VitalsMetric label="Total Blocking Time (TBT)" value={target.coreWebVitals?.tbt || '0ms'} threshold="200ms" description="Responsiveness during load." />
+                  <VitalsMetric label="Speed Index" value={target.coreWebVitals?.speedIndex || '0s'} threshold="3.4s" description="How quickly content is visible." />
+                </div>
+              </div>
+              
+              <div className="glass-panel rounded-[40px] p-10 bg-indigo-500/5 border-indigo-500/10">
+                <h3 className="text-[11px] font-black mb-8 text-indigo-400 uppercase tracking-widest-label">Performance Insights</h3>
+                <div className="space-y-6">
+                  {target.technical?.suggestions?.slice(0, 3).map((sug, i) => (
+                    <div key={i} className="flex gap-4 p-5 bg-white/[0.03] border border-white/5 rounded-3xl group hover:border-indigo-500/30 transition-all">
+                       <div className="shrink-0 w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 text-[10px] font-black">!</div>
+                       <p className="text-[11px] text-slate-300 font-bold leading-relaxed">{sug}</p>
+                    </div>
+                  ))}
+                  <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest text-center mt-6">Powered by Google PSI Intelligence</p>
                 </div>
               </div>
             </div>
@@ -510,6 +559,48 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
     </div>
   );
 };
+
+const LighthouseGauge: React.FC<{ label: string, value: number }> = ({ label, value }) => {
+  const color = value >= 90 ? '#10b981' : value >= 50 ? '#f59e0b' : '#ef4444';
+  const percentage = (value / 100) * 100;
+  
+  return (
+    <div className="flex flex-col items-center gap-6 group">
+      <div className="relative w-28 h-28">
+        <svg className="w-full h-full transform -rotate-90">
+          <circle cx="56" cy="56" r="50" stroke="rgba(255,255,255,0.05)" strokeWidth="6" fill="transparent" />
+          <circle 
+            cx="56" cy="56" r="50" 
+            stroke={color} 
+            strokeWidth="6" 
+            fill="transparent" 
+            strokeDasharray="314.159" 
+            strokeDashoffset={314.159 - (314.159 * value) / 100} 
+            strokeLinecap="round"
+            className="transition-all duration-1000 ease-out"
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-3xl font-black font-display" style={{ color }}>{value}</span>
+        </div>
+      </div>
+      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-white transition-colors">{label}</span>
+    </div>
+  );
+};
+
+const VitalsMetric: React.FC<{ label: string, value: string, threshold: string, description: string }> = ({ label, value, threshold, description }) => (
+  <div className="space-y-2 p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-indigo-500/20 transition-all">
+    <div className="flex justify-between items-start">
+      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{label}</p>
+      <span className="text-xs font-mono font-bold text-slate-400">Target: &lt;{threshold}</span>
+    </div>
+    <div className="flex items-baseline gap-2">
+      <p className="text-2xl font-black font-display text-white">{value}</p>
+    </div>
+    <p className="text-[10px] text-slate-600 font-bold">{description}</p>
+  </div>
+);
 
 const IntentBadge: React.FC<{ intent: string }> = ({ intent }) => {
    const lower = intent.toLowerCase();
