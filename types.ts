@@ -122,6 +122,7 @@ export interface SEOAuditData {
       validationScore: number;
       missingCriticalTypes: string[];
     };
+    technicalDebtLedger: { issue: string; impact: string; effort: string; recommendation: string }[];
   };
   onPage: {
     missingTitles: number;
@@ -141,6 +142,7 @@ export interface SEOAuditData {
     entityCount: number;
     entitiesDetected: string[];
     keywordCannibalizationRisk: number;
+    semanticMapInsights: { topic: string; coverage: number; gapImportance: string }[];
   };
   organicIntel: {
     estimatedMonthlyTraffic: number;
@@ -153,6 +155,9 @@ export interface SEOAuditData {
       intent: string;
       serpFeatures?: string[];
       cpc?: string;
+      conversionPotential: number;
+      trendingStatus: 'Rising' | 'Stable' | 'Declining';
+      competitiveAnalysis: string;
     }[];
     topPages: string[];
     gapAnalysis: {
