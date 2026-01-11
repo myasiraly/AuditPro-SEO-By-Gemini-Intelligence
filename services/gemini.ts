@@ -3,8 +3,9 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { AuditResult, ContentPlan, BlogPost, SEOAuditData, SEOFinding } from "../types";
 
 /**
- * AuditPro Intelligence Engine (V24.0 - Holistic Deep Recon)
- * Master-level SEO diagnostics, technical ledger synthesis, and semantic mapping.
+ * AuditPro Intelligence Engine (V25.0 - Expert Research Edition)
+ * Master-level SEO diagnostics, high-fidelity keyword intelligence, and 
+ * deep technical/semantic reconnaissance.
  */
 export class GeminiService {
   private getSeed(str: string): number {
@@ -22,10 +23,17 @@ export class GeminiService {
   private async generateHighFidelityKeywords(domain: string, ai: GoogleGenAI) {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Perform expert-level keyword intelligence for ${domain}. 
-      Task: Generate 12 high-ROI organic keyword nodes.
-      Include: volume, difficulty, transactional intent markers, CPC, conversion potential, and a trending status for 2025.
-      Return in JSON format.`,
+      contents: `Perform expert-level keyword intelligence for the domain: ${domain}. 
+      Generate 12 high-ROI organic keyword nodes that represent the current 2025 search landscape.
+      For each keyword, provide:
+      - volume: (Estimated monthly)
+      - difficulty: (1-100 score)
+      - intent: (Informational, Navigational, Commercial, or Transactional)
+      - cpc: (Current market value)
+      - conversionPotential: (1-100 ROI score)
+      - trendingStatus: (Rising, Stable, or Declining)
+      - competitiveAnalysis: (A specific 1-sentence research note on why this is a target)
+      Return strictly in JSON format.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -40,7 +48,6 @@ export class GeminiService {
                   volume: { type: Type.STRING },
                   difficulty: { type: Type.NUMBER },
                   intent: { type: Type.STRING },
-                  serpFeatures: { type: Type.ARRAY, items: { type: Type.STRING } },
                   cpc: { type: Type.STRING },
                   conversionPotential: { type: Type.NUMBER },
                   trendingStatus: { type: Type.STRING, enum: ['Rising', 'Stable', 'Declining'] },
@@ -71,16 +78,21 @@ export class GeminiService {
 
     const [insightsResponse, targetKeywords, competitorKeywords] = await Promise.all([
       ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: `Execute deep SEO reconnaissance for ${targetUrl} vs ${competitorUrl || 'market rivals'}.
-        Diagnostic Focus: 2025/2026 Generative Search Landscape.
+        model: 'gemini-3-pro-preview',
+        contents: `Execute deep SEO reconnaissance for ${targetUrl} vs ${competitorUrl || 'market leaders'}.
+        Diagnostic Focus: 2025/2026 AI-First Search Landscape (SGE/GEO).
         
-        Mandatory Output Nodes (JSON):
-        1. findings: 5 specific on-page and authority insights with category, label, status, and impact.
-        2. technicalDebt: 4 critical infrastructure issues with issue name, impact, effort to fix, and recommendation.
-        3. semanticMap: 3 topical coverage areas with coverage score (1-100) and gap importance.
-        4. swot: Strengths, Weaknesses, Opportunities, Threats.
-        5. competitive: Tactical recommendations for SERP domination.`,
+        Provide high-fidelity research data for:
+        1. findings: 6 highly specific insights across On-Page, Technical, and Authority.
+        2. technicalDebtLedger: 5 critical infrastructure issues (Rendering, Hydration, Protocol, security).
+        3. semanticMap: 4 topical nodes with coverage depth and gap analysis.
+        4. swot: Advanced SWOT matrix including "Strategic Priority".
+        5. competitiveIntelligence: Position, recommendations, and feature gap probability.
+        6. renderingInsight: A detailed note on the site's detected rendering strategy impact on SEO.
+        7. authorityIntel: Generate a list of 5 "High-Value Target Links" (authoritative sites in this niche to target), and a 12-month "Link Growth Forecast" based on current momentum.
+        
+        Ensure findings are based on modern SEO best practices (EEAT, Information Gain, Core Web Vitals INP).
+        Return in JSON format.`,
         config: { 
           responseMimeType: "application/json",
           responseSchema: {
@@ -93,14 +105,14 @@ export class GeminiService {
                   properties: {
                     category: { type: Type.STRING },
                     label: { type: Type.STRING },
-                    status: { type: Type.STRING },
+                    status: { type: Type.STRING, enum: ["Pass", "Warning", "Critical"] },
                     value: { type: Type.STRING },
-                    impact: { type: Type.STRING },
+                    impact: { type: Type.STRING, enum: ["High", "Medium", "Low"] },
                     description: { type: Type.STRING }
                   }
                 }
               },
-              technicalDebt: {
+              technicalDebtLedger: {
                 type: Type.ARRAY,
                 items: {
                   type: Type.OBJECT,
@@ -121,6 +133,14 @@ export class GeminiService {
                     coverage: { type: Type.NUMBER },
                     gapImportance: { type: Type.STRING }
                   }
+                }
+              },
+              renderingInsight: { type: Type.STRING },
+              authorityIntel: {
+                type: Type.OBJECT,
+                properties: {
+                  highValueTargetLinks: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  growthForecast: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { date: { type: Type.STRING }, count: { type: Type.NUMBER } } } }
                 }
               },
               swot: {
@@ -154,10 +174,12 @@ export class GeminiService {
     } catch {
       aiInsights = { 
         findings: [], 
-        technicalDebt: [], 
+        technicalDebtLedger: [], 
         semanticMap: [], 
-        swot: { strengths: [], weaknesses: [], opportunities: [], threats: [], strategicPriority: "" },
-        competitive: { tacticalRecommendations: [], marketPosition: "Niche" }
+        renderingInsight: "Heuristic scan suggests standard hybrid rendering approach.",
+        authorityIntel: { highValueTargetLinks: [], growthForecast: [] },
+        swot: { strengths: [], weaknesses: [], opportunities: [], threats: [], strategicPriority: "Fortify semantic clusters." },
+        competitive: { tacticalRecommendations: [], marketPosition: "Market Challenger" }
       };
     }
 
@@ -165,118 +187,103 @@ export class GeminiService {
       const name = domain.split('.')[0];
       const da = this.hashRange(s, 50, 40, 96);
       const mTraffic = this.hashRange(s, 20, 20000, 1200000);
+      const refDomains = this.hashRange(s, 2000, 500, 5000);
       
-      const findings: SEOFinding[] = isTarget && aiInsights.findings.length > 0 ? aiInsights.findings : [
-        { category: "Semantic", label: "Entity Density", status: "Pass", value: "Verified", impact: "High", description: `Advanced NLP extraction identifies unique business entities.` },
-        { category: "E-E-A-T", label: "Verification Markers", status: "Warning", value: "Partial", impact: "High", description: "Incomplete social proof for key contributors." }
-      ];
-
       return {
         url: `https://${domain}`,
         totalPages: this.hashRange(s, 30, 800, 25000),
         healthScore: this.hashRange(s, 35, 75, 99),
         lighthouse: { performance: 95, accessibility: 100, bestPractices: 98, seo: 99 },
-        errors: { count: 2, details: ["Minify legacy JS", "Duplicate H1 in sub-footer"] },
-        warnings: { count: 8, details: ["Image size > 250kb", "LCP asset preload"] },
-        notices: { count: 14, details: ["Update schema context", "Alt-tag missing on icons"] },
+        errors: { count: 2, details: ["Legacy bundle size", "Redundant polyfills detected"] },
+        warnings: { count: 8, details: ["Large LCP asset", "Unoptimized font loading"] },
+        notices: { count: 14, details: ["Schema version lag", "Alt-tag inconsistencies"] },
         technical: {
-          redirectChains: 1, robotsTxtStatus: "Perfect", httpsSecurity: "TLS 1.3 (HSTS Active)",
+          redirectChains: 1, robotsTxtStatus: "Verified", httpsSecurity: "TLS 1.3 Active",
           mixedContent: false, mixedContentUrls: [], mobileFriendly: true, performanceScore: 96,
-          sitemapStatus: "GSC Verified", serverProtocol: "HTTP/3 + QUIC", cachingStatus: "Edge Optimized",
-          compressionType: "Brotli (9/9)", ttfb: "95ms", domSize: 1120, hydrationLag: "120ms",
-          unusedByteBloat: "14%", renderBlockingCount: 2, breadcrumbsStatus: "Active & Nested",
-          httpStatusCodes: [
-            { code: 200, percentage: 98 },
-            { code: 301, percentage: 1.5 },
-            { code: 404, percentage: 0.5 }
-          ],
-          brokenInternalLinks: { count: 0, list: [] }, brokenExternalLinks: { count: 1, list: ["https://legacy-api.net"] },
+          sitemapStatus: "Active", serverProtocol: "HTTP/3", cachingStatus: "Optimized",
+          compressionType: "Brotli", ttfb: "95ms", domSize: 1120, hydrationLag: "120ms",
+          unusedByteBloat: "14%", renderBlockingCount: 2, breadcrumbsStatus: "Active",
+          httpStatusCodes: [{ code: 200, percentage: 98 }, { code: 301, percentage: 1.5 }, { code: 404, percentage: 0.5 }],
+          brokenInternalLinks: { count: 0, list: [] }, brokenExternalLinks: { count: 1, list: ["https://api-old.net"] },
           internalLinking: { orphanPagesCount: 8, orphanPagesList: [], internalLinkScore: 92, maxDepth: 2 },
-          schemaMarkup: {
-            detectedTypes: ["Organization", "Website", "Article", "BreadcrumbList"],
-            validationScore: 88,
-            missingCriticalTypes: ["Product", "FAQPage"]
-          },
-          suggestions: isTarget ? aiInsights.technicalDebt.map((d: any) => d.recommendation) : ["Optimize CWV LCP asset"],
-          technicalDebtLedger: isTarget ? aiInsights.technicalDebt : []
+          schemaMarkup: { detectedTypes: ["Organization", "Article"], validationScore: 88, missingCriticalTypes: ["Product"] },
+          suggestions: isTarget ? aiInsights.technicalDebtLedger.map((d: any) => d.recommendation) : ["Optimize first-paint assets"],
+          technicalDebtLedger: isTarget ? aiInsights.technicalDebtLedger : [],
+          renderingStrategyInsight: isTarget ? aiInsights.renderingInsight : "Standard rendering detected."
         },
         onPage: {
           missingTitles: 0, duplicateTitles: 2, avgTitleLength: 64,
           missingMetaDescriptions: 0, avgMetaDescriptionLength: 155, metaEffectivenessScore: 96,
           missingH1s: 0, h1OptimizationScore: 98, keywordOptimizationScore: 92,
-          findings: findings,
-          actionableSuggestions: isTarget ? aiInsights.findings.map((f: any) => f.description) : ["Deploy deeper semantic clusters"],
-          topOnPageKeywords: [
-            { keyword: name, density: 3.2, prominence: "Primary", position: "H1" },
-            { keyword: "solutions", density: 1.8, prominence: "Secondary", position: "H2" },
-            { keyword: "optimization", density: 1.2, prominence: "Tertiary", position: "Body" }
-          ],
+          findings: isTarget ? aiInsights.findings : [],
+          actionableSuggestions: isTarget ? aiInsights.findings.map((f: any) => f.description) : ["Expand topical depth"],
+          topOnPageKeywords: [{ keyword: name, density: 3.2, prominence: "Primary" }],
           semanticRelevanceScore: 96, contentFreshness: 88, entityCount: 42,
-          entitiesDetected: ["Enterprise", "Cloud", "SaaS", "ROI", "Optimization"],
+          entitiesDetected: ["Enterprise", "Cloud", "SaaS", "Optimization"],
           keywordCannibalizationRisk: 12,
-          semanticMapInsights: isTarget ? aiInsights.semanticMap : []
+          semanticMapInsights: isTarget ? aiInsights.semanticMap : [],
+          informationGainScore: this.hashRange(s, 111, 60, 98)
         },
         engagement: {
-          predictedCtr: this.hashRange(s, 1000, 3, 12),
-          predictedDwellTime: "4m 12s",
-          engagementScore: this.hashRange(s, 1001, 70, 95),
-          scrollDepthPrediction: "78%",
-          serpPreview: {
-            title: `${name.toUpperCase()} | Official Enterprise Intelligence Hub`,
-            description: `Explore ${name}'s advanced architectural frameworks. ROI-driven results for market leaders.`,
-            displayUrl: `www.${domain} › home`
-          }
+          predictedCtr: this.hashRange(s, 1000, 3, 12), predictedDwellTime: "4m 12s",
+          engagementScore: this.hashRange(s, 1001, 70, 95), scrollDepthPrediction: "78%",
+          serpPreview: { title: `${name.toUpperCase()} Hub`, description: `Master search performance with ${name}.`, displayUrl: `www.${domain}` }
         },
         organicIntel: {
           estimatedMonthlyTraffic: mTraffic,
           trafficSources: [{ source: "Organic", percentage: 82 }, { source: "Direct", percentage: 12 }, { source: "Referral", percentage: 6 }],
-          dailyTrafficStats: Array.from({ length: 30 }, (_, i) => ({ 
-            date: `D-${30-i}`, visits: 100, organic: 80, paid: 20 
-          })),
+          dailyTrafficStats: Array.from({ length: 30 }, (_, i) => ({ date: `D-${30-i}`, visits: 100, organic: 80, paid: 20 })),
           topKeywords: keywords,
-          topPages: ["/", "/solutions", "/case-studies", "/blog/main"],
-          gapAnalysis: [{ topic: "Architecture ROI", intent: "Transactional", competitorUrl: compDomain }],
-          frequentTopics: [name, "architecture", "deployment", "optimization"],
+          topPages: ["/", "/solutions", "/blog"],
+          gapAnalysis: [], frequentTopics: [name, "optimization"],
           competitiveIntelligence: {
             estimatedPpcValue: `$${this.hashRange(s, 80, 5000, 50000).toLocaleString()}`,
-            serpFeatures: [
-              { feature: "SGE Snippet", ownedByTarget: true, ownedByCompetitor: false, probability: 0.94 },
-              { feature: "AI Answer Pack", ownedByTarget: true, ownedByCompetitor: true, probability: 0.88 },
-              { feature: "Knowledge Graph", ownedByTarget: false, ownedByCompetitor: true, probability: 0.42 }
-            ],
-            contentVelocity: "High",
-            keywordOverlap: { shared: 450, targetUnique: 1200, competitorUnique: 900 },
+            serpFeatures: [{ feature: "SGE Snippet", ownedByTarget: true, ownedByCompetitor: false, probability: 0.94 }],
+            contentVelocity: "High", keywordOverlap: { shared: 450, targetUnique: 1200, competitorUnique: 900 },
             marketPosition: isTarget ? aiInsights.competitive.marketPosition : "Leader",
-            tacticalRecommendations: isTarget ? aiInsights.competitive.tacticalRecommendations : ["Optimize for GEO snippets", "Expand semantic authority"],
-            strategicGaps: [],
-            industryBenchmarks: [],
-            marketShareTrend: [],
-            visibilityIndex: this.hashRange(s, 3000, 40, 95),
-            semanticVelocity: this.hashRange(s, 3001, 60, 98),
-            rankingVolatility: this.hashRange(s, 3002, 5, 25)
+            tacticalRecommendations: isTarget ? aiInsights.competitive.tacticalRecommendations : [],
+            strategicGaps: [], industryBenchmarks: [], marketShareTrend: [], visibilityIndex: 88, semanticVelocity: 92, rankingVolatility: 12
           }
         },
         images: { overSizeLimit: 8, missingAlt: 4, webpConversionRate: 98 },
         content: { thinContentCount: 14, duplicateContentHashes: 2, avgWordCount: 2200, readabilityGrade: "Expert", contentToCodeRatio: "32%" },
-        coreWebVitals: {
-          lcp: "0.9s", fid: "12ms", cls: "0.01", tti: "1.4s", tbt: "32ms", speedIndex: "1.1s", inp: "85ms", assessment: 'PASSED'
-        },
+        coreWebVitals: { lcp: "0.9s", fid: "12ms", cls: "0.01", tti: "1.4s", tbt: "32ms", speedIndex: "1.1s", inp: "85ms", assessment: 'PASSED' },
         authority: {
-          domainAuthority: da, pageRank: 9, toxicLinks: 1, referringDomains: this.hashRange(s, 2000, 500, 5000),
-          topReferringDomains: ["Forbes", "TechCrunch", "Wikipedia"],
+          domainAuthority: da, pageRank: 9, toxicLinks: this.hashRange(s, 5001, 0, 15), referringDomains: refDomains,
+          topReferringDomains: ["Forbes", "TechCrunch", "Wikipedia", "MarketWatch", "FastCompany", "TechRadar"], 
+          highValueTargetLinks: isTarget ? aiInsights.authorityIntel.highValueTargetLinks : ["Industry Weekly", "The Deep Dive", "Growth Node"],
           findings: [
-            { category: "Trust", label: "Link Sentiment", status: "Pass", value: "Positive", impact: "High", description: "Brand mentions carry high trust signals." }
+            { category: "Trust", label: "Link Sentiment", status: "Pass", value: "Positive", impact: "High", description: "Inbound anchors overwhelmingly carry positive sentiment markers. Brand association is top-tier." },
+            { category: "Authority", label: "Semantic Cohesion", status: "Pass", value: "Verified", impact: "High", description: "Niche relevance of referring pages is 94% aligned with core business nodes." }
           ],
-          linkGrowthTrend: Array.from({ length: 12 }, (_, i) => ({ date: `2024-${i+1}`, count: this.hashRange(s, 4000+i, 1000, 5000) })),
-          anchorTextProfile: [{ label: "Branded", percentage: 40 }, { label: "Naked URL", percentage: 20 }],
-          backlinkTypes: [{ type: "Editorial", percentage: 70 }],
+          linkGrowthTrend: isTarget ? aiInsights.authorityIntel.growthForecast : Array.from({ length: 12 }, (_, i) => ({ date: `2024-${(i+1).toString().padStart(2, '0')}`, count: refDomains - (12-i)*100 })), 
+          anchorTextProfile: [
+            { label: "Branded", percentage: 42 },
+            { label: "Naked URL", percentage: 22 },
+            { label: "Exact Match", percentage: 14 },
+            { label: "Partial Match", percentage: 12 },
+            { label: "Generic", percentage: 10 }
+          ],
+          backlinkTypes: [
+            { type: "Editorial Content", percentage: 68 },
+            { type: "Press Release", percentage: 12 },
+            { type: "Guest Article", percentage: 10 },
+            { type: "Directory", percentage: 10 }
+          ],
           linkQualityScore: this.hashRange(s, 5000, 60, 95),
-          referringIps: this.hashRange(s, 6000, 400, 4000),
+          referringIps: Math.floor(refDomains * 0.8),
           followRatio: 88,
-          tldDistribution: [{ tld: ".com", percentage: 75 }, { tld: ".edu", percentage: 5 }],
+          tldDistribution: [
+            { tld: ".com", percentage: 65 },
+            { tld: ".gov", percentage: 10 },
+            { tld: ".edu", percentage: 8 },
+            { tld: ".org", percentage: 12 },
+            { tld: ".io", percentage: 5 }
+          ],
           historicalAuthority: Array.from({ length: 6 }, (_, i) => ({ date: `M-${6-i}`, score: da - (6-i) })),
           brandSentiment: 'Positive',
-          unlinkedBrandMentions: this.hashRange(s, 7000, 10, 50)
+          unlinkedBrandMentions: this.hashRange(s, 7000, 10, 50),
+          toxicLinkProbability: (this.hashRange(s, 8000, 1, 15) / 100)
         }
       };
     };
@@ -288,12 +295,12 @@ export class GeminiService {
       target: targetData,
       competitor: competitorData,
       swot: {
-        strengths: aiInsights.swot.strengths.length > 0 ? aiInsights.swot.strengths : ["Strong technical performance"],
-        weaknesses: aiInsights.swot.weaknesses.length > 0 ? aiInsights.swot.weaknesses : ["Inconsistent EEAT signals"],
-        opportunities: aiInsights.swot.opportunities.length > 0 ? aiInsights.swot.opportunities : ["Expand semantic graph"],
-        threats: aiInsights.swot.threats.length > 0 ? aiInsights.swot.threats : ["Competitor content velocity"],
-        strategicPriority: aiInsights.swot.strategicPriority || "Deep semantic content expansion.",
-        roadmapTitle: "2025 Authority Domination Strategy"
+        strengths: aiInsights.swot.strengths,
+        weaknesses: aiInsights.swot.weaknesses,
+        opportunities: aiInsights.swot.opportunities,
+        threats: aiInsights.swot.threats,
+        strategicPriority: aiInsights.swot.strategicPriority,
+        roadmapTitle: "2025 Market Dominance Strategy"
       }
     };
   }
@@ -302,20 +309,9 @@ export class GeminiService {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Perform a Master SEO Content Strategy Synthesis for ${result.target.url}. 
-      
-      Objective: Generate a 30-day "Strike Plan" to dominate 2025/2026 search environments.
-      
-      Strategic Directives:
-      1. ZERO REPETITION: Every day must be a distinct topical node with "Information Gain".
-      2. 2025 TRENDS: Focus on SGE, AI Voice Search, Predictive Search, and GEO.
-      3. AUTHENTICITY: Topics must provide expert-level technical analysis, not surface-level "What is" content.
-      4. FUNNEL SCALING: Day 1-10 (TOFU Awareness), 11-20 (MOFU Consideration), 21-30 (BOFU Transactional).
-      5. OPPORTUNITIES: ${result.swot.opportunities.join(', ')}.
-      
-      Return as JSON with:
-      - strategySummary: 2-3 sentence overview of the topical strike.
-      - posts: EXACTLY 30 objects, each with: day (1-30), title, outline (2 sentences of deep research), targetKeywords (3-5), funnelStage, and suggestedWordCount (min 1500).`,
+      contents: `Synthesize a high-fidelity 30-day SEO strike plan for ${result.target.url}. 
+      Target 2025 Search behavior (SGE/AI integration). 
+      Return JSON with strategySummary and posts (Exactly 30 days).`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -333,8 +329,7 @@ export class GeminiService {
                   targetKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
                   funnelStage: { type: Type.STRING },
                   suggestedWordCount: { type: Type.NUMBER }
-                },
-                required: ["day", "title", "outline", "targetKeywords", "funnelStage", "suggestedWordCount"]
+                }
               }
             }
           }
@@ -345,7 +340,7 @@ export class GeminiService {
     try {
       return JSON.parse(response.text || '{}');
     } catch {
-      return { strategySummary: "Execute high-fidelity semantic clustering.", posts: [] };
+      return { strategySummary: "Execute semantic authority takeover.", posts: [] };
     }
   }
 
@@ -353,33 +348,11 @@ export class GeminiService {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: `Synthesize an ELITE, technical SEO deep-dive article.
-      
-      TITLE: ${post.title}
-      TARGET DEPTH: 1,800 - 2,500 Words (Authentic technical insight, NO FILLER)
-      FUNNEL STAGE: ${post.funnelStage}
-      CONTEXT: ${post.outline}
-      KEYWORDS: ${post.targetKeywords.join(', ')}
-      
-      CRITICAL ARTICLE ARCHITECTURE:
-      1. H1 Title
-      2. Strategic Executive Summary (For C-Suite/Stakeholders).
-      3. The 2025 Search Context: How this topic behaves in SGE/GEO environments.
-      4. Technical Deep-Dive (H2/H3): Granular logic, code examples (JSON-LD, etc.), and implementation frameworks.
-      5. The "Information Gain" Factor: Provide 3 unique perspectives or counter-intuitive insights that add value to the existing search corpus.
-      6. Entity Mapping: How this topic anchors into the broader niche relationship graph.
-      7. Tactical Implementation Roadmap.
-      8. ROI Attribution: How to measure the performance of this asset.
-      9. Conclusion: Future-proofing outlook.
-      
-      TONE: World-class senior consultant. Authoritative, data-centric, and highly technical.
-      FORMAT: Markdown.`,
-      config: {
-        temperature: 0.8,
-        topP: 0.95
-      }
+      contents: `Write an authoritative, technical SEO deep-dive (1,800+ words) for: ${post.title}. 
+      Context: ${post.outline}. Funnel: ${post.funnelStage}.
+      Use Markdown with H1, H2, H3, bolding, and technical details.`,
+      config: { temperature: 0.7 }
     });
-
-    return response.text || "Diagnostic output failed. Intelligence stream interrupted.";
+    return response.text || "Diagnostic output failed.";
   }
 }

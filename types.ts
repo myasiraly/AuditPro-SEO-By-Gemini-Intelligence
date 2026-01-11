@@ -123,6 +123,7 @@ export interface SEOAuditData {
       missingCriticalTypes: string[];
     };
     technicalDebtLedger: { issue: string; impact: string; effort: string; recommendation: string }[];
+    renderingStrategyInsight: string;
   };
   onPage: {
     missingTitles: number;
@@ -143,6 +144,7 @@ export interface SEOAuditData {
     entitiesDetected: string[];
     keywordCannibalizationRisk: number;
     semanticMapInsights: { topic: string; coverage: number; gapImportance: string }[];
+    informationGainScore: number;
   };
   organicIntel: {
     estimatedMonthlyTraffic: number;
@@ -219,6 +221,7 @@ export interface SEOAuditData {
     historicalAuthority: { date: string; score: number }[];
     brandSentiment: 'Positive' | 'Neutral' | 'Negative';
     unlinkedBrandMentions: number;
+    toxicLinkProbability: number;
   };
 }
 
