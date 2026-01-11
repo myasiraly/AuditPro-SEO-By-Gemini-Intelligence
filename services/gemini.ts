@@ -75,8 +75,8 @@ export class GeminiService {
       const findings: SEOFinding[] = [
         { category: "Semantic", label: "Entity Density", status: "Pass", value: "Verified", impact: "High", description: `Advanced NLP extraction identifies ${this.hashRange(s, 100, 20, 100)} unique entities. Strong alignment with '${name}' core business nodes.` },
         { category: "E-E-A-T", label: "Authorship Integrity", status: "Warning", value: "Partial", impact: "High", description: "Missing verified social proof for key contributors. Google favors 'Experience' markers." },
-        { category: "CTR", label: "Snippet Psychology", status: "Pass", value: "88%", impact: "Medium", description: "Title tags use power words effectively." },
-        { category: "UX", label: "Searcher Intent Fit", status: "Pass", value: "Excellent", impact: "High", description: "Content body maps 1:1 with informational intent cycles." }
+        { category: "CTR", label: "Snippet Psychology", status: "Pass", value: "88%", impact: "Medium", description: "Title tags use power words effectively. Sentiment analysis indicates a high click appeal." },
+        { category: "UX", label: "Searcher Intent Fit", status: "Pass", value: "Excellent", impact: "High", description: "Content body maps 1:1 with informational intent cycles. High-resolution layout enhances dwell time." }
       ];
 
       return {
@@ -114,8 +114,9 @@ export class GeminiService {
           findings: findings,
           actionableSuggestions: isTarget ? aiInsights.onPage : ["Increase first-hand experience citations", "Deploy FAQ schema"],
           topOnPageKeywords: [
-            { keyword: name, density: 3.2, prominence: "Primary", position: "Above Fold" },
-            { keyword: "architecture", density: 1.8, prominence: "Secondary", position: "H2" }
+            { keyword: name, density: 3.2, prominence: "Primary", position: "H1 / Hero Section" },
+            { keyword: "architecture", density: 1.8, prominence: "Secondary", position: "H2 / Feature Grid" },
+            { keyword: "optimization", density: 1.2, prominence: "Tertiary", position: "Body Copy" }
           ],
           semanticRelevanceScore: 96, contentFreshness: 88, entityCount: 42,
           entitiesDetected: ["Enterprise", "Cloud", "SaaS", "ROI", "Optimization"],
@@ -128,7 +129,7 @@ export class GeminiService {
           scrollDepthPrediction: "78%",
           serpPreview: {
             title: `${name.toUpperCase()} Solutions - The #1 Enterprise Hub`,
-            description: `Discover how ${name} revolutionizes the industry with high-fidelity architecture.`,
+            description: `Discover how ${name} revolutionizes the industry with high-fidelity architecture. Learn about our ROI optimization strategies and more.`,
             displayUrl: `www.${domain} › solutions`
           }
         },

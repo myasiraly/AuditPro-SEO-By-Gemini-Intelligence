@@ -317,7 +317,7 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                       <div key={i} className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-violet-500/20 transition-all flex flex-col gap-4">
                          <div className="flex justify-between items-center">
                            <span className="text-[10px] font-black text-violet-400 uppercase tracking-widest">{gap.category}</span>
-                           <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest-label border ${gap.impact === 'High' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'}`}>
+                           <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest-label border ${gap.impact === 'High' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}>
                              {gap.impact} Impact
                            </span>
                          </div>
@@ -376,38 +376,120 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
 
         {activeTab === 'onpage' && (
           <div className="space-y-12 animate-in fade-in duration-500">
+             {/* Primary High-Level Metrics */}
              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <MetricCard title="Entity Depth" value={target.onPage.entityCount} subtitle="NLP Disambiguation" color="teal" />
-                <MetricCard title="Semantic Sync" value={`${target.onPage.semanticRelevanceScore}%`} subtitle="Topic Alignment" color="violet" />
-                <MetricCard title="Freshness" value={`${target.onPage.contentFreshness}%`} subtitle="Temporal Velocity" color="cyan" />
-                <MetricCard title="Cannibalization" value={`${target.onPage.keywordCannibalizationRisk}%`} subtitle="Risk Heuristic" color="rose" />
+                <MetricCard title="Readability" value={target.content.readabilityGrade} subtitle="Structural Tone" color="violet" />
+                <MetricCard title="Content/Code" value={target.content.contentToCodeRatio} subtitle="Semantic Density" color="cyan" />
+                <MetricCard title="Word Count" value={target.content.avgWordCount} subtitle="Avg. Strategic Length" color="indigo" />
              </div>
 
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+               {/* Meta Tag Details Section */}
                <div className="glass-panel rounded-[40px] p-10">
-                 <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10">Detected Entities</h3>
-                 <div className="flex flex-wrap gap-2">
-                    {target.onPage.entitiesDetected.map((entity, i) => (
-                      <span key={i} className="px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/5 text-[10px] font-bold text-slate-300 hover:border-violet-500/30 hover:text-white transition-all cursor-default">
-                        {entity}
-                      </span>
-                    ))}
+                 <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10">Meta Tags & Snippet Integrity</h3>
+                 <div className="space-y-8">
+                    <div className="p-6 rounded-3xl bg-black/20 border border-white/5">
+                      <p className="text-[10px] font-black text-violet-400 uppercase tracking-widest mb-3">SERP Preview Mode</p>
+                      <h4 className="text-xl font-bold text-[#8ab4f8] hover:underline cursor-pointer mb-1">{target.engagement.serpPreview.title}</h4>
+                      <p className="text-xs text-[#3c4043] mb-2">{target.engagement.serpPreview.displayUrl}</p>
+                      <p className="text-sm text-[#bdc1c6] leading-relaxed">{target.engagement.serpPreview.description}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5">
+                        <p className="text-[10px] font-bold text-slate-500 uppercase mb-2">Title Length</p>
+                        <p className="text-lg font-black text-white">{target.onPage.avgTitleLength} Chars</p>
+                      </div>
+                      <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5">
+                        <p className="text-[10px] font-bold text-slate-500 uppercase mb-2">Meta Desc Length</p>
+                        <p className="text-lg font-black text-white">{target.onPage.avgMetaDescriptionLength} Chars</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-5 rounded-2xl bg-emerald-500/[0.03] border border-emerald-500/10">
+                      <div>
+                        <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Effectiveness Score</p>
+                        <p className="text-xs text-slate-400 mt-1">AI-predicted CTR appeal based on sentiment.</p>
+                      </div>
+                      <span className="text-3xl font-black text-emerald-400">{target.onPage.metaEffectivenessScore}%</span>
+                    </div>
                  </div>
                </div>
 
+               {/* Heading Hierarchy & Keywords Section */}
+               <div className="glass-panel rounded-[40px] p-10">
+                 <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10">Heading Hierarchy & Placement</h3>
+                 <div className="space-y-6">
+                    <div className="flex items-center justify-between p-5 rounded-2xl bg-white/[0.02] border border-white/5">
+                       <div className="flex items-center gap-4">
+                          <span className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center text-violet-400 font-black text-xs">H1</span>
+                          <div>
+                            <p className="text-xs font-bold text-white">Main H1 Optimization</p>
+                            <p className="text-[10px] text-slate-500 uppercase font-black">Single Node Verified</p>
+                          </div>
+                       </div>
+                       <span className="text-xl font-black text-white">{target.onPage.h1OptimizationScore}%</span>
+                    </div>
+
+                    <div className="p-6 rounded-3xl bg-white/[0.01] border border-white/5">
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">Keyword Prominence Recon</p>
+                      <div className="space-y-4">
+                         {target.onPage.topOnPageKeywords.map((kw, i) => (
+                           <div key={i} className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5 group hover:border-violet-500/30 transition-all">
+                              <div className="flex items-center gap-4">
+                                 <span className="text-[10px] font-black text-slate-600">#{i+1}</span>
+                                 <div>
+                                   <p className="text-sm font-bold text-white group-hover:text-violet-300 transition-colors">{kw.keyword}</p>
+                                   <p className="text-[9px] text-slate-500 uppercase font-black">{kw.position} | {kw.prominence}</p>
+                                 </div>
+                              </div>
+                              <span className="text-[11px] font-black text-indigo-400">{kw.density}%</span>
+                           </div>
+                         ))}
+                      </div>
+                    </div>
+                 </div>
+               </div>
+             </div>
+
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+               {/* Media & Image Alt Details */}
+               <div className="glass-panel rounded-[40px] p-10">
+                 <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10">Media Integrity</h3>
+                 <div className="space-y-6">
+                    <div className="flex items-center justify-between p-5 rounded-2xl bg-rose-500/[0.03] border border-rose-500/10">
+                       <p className="text-xs font-bold text-slate-400">Missing Alt Tags</p>
+                       <span className="text-xl font-black text-rose-400">{target.images.missingAlt} Nodes</span>
+                    </div>
+                    <div className="flex items-center justify-between p-5 rounded-2xl bg-amber-500/[0.03] border border-amber-500/10">
+                       <p className="text-xs font-bold text-slate-400">Oversized Payloads</p>
+                       <span className="text-xl font-black text-amber-400">{target.images.overSizeLimit} Assets</span>
+                    </div>
+                    <div className="p-5 rounded-2xl bg-emerald-500/[0.03] border border-emerald-500/10">
+                       <div className="flex justify-between items-center mb-3">
+                         <p className="text-xs font-bold text-slate-400">WebP Coverage</p>
+                         <span className="text-xl font-black text-emerald-400">{target.images.webpConversionRate}%</span>
+                       </div>
+                       <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-emerald-500 h-full" style={{ width: `${target.images.webpConversionRate}%` }}></div>
+                       </div>
+                    </div>
+                 </div>
+               </div>
+
+               {/* Qualitative On-Page Findings */}
                <div className="lg:col-span-2 glass-panel rounded-[40px] overflow-hidden">
                  <div className="p-10 border-b border-white/10 bg-white/[0.01]">
-                   <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label">On-Page Recon Findings</h3>
+                   <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label">Actionable On-Page Recon Findings</h3>
                  </div>
                  <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-white/5 border-b border-white/5">
                    {target.onPage.findings.map((f, i) => (
-                     <div key={i} className="p-8 hover:bg-white/[0.02] flex flex-col justify-between">
+                     <div key={i} className="p-8 hover:bg-white/[0.02] flex flex-col justify-between group">
                         <div>
                            <div className="flex justify-between items-start mb-4">
-                              <span className="text-[9px] font-black text-slate-600 uppercase">{f.category}</span>
+                              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{f.category}</span>
                               <OnPageStatusBadge status={f.status} />
                            </div>
-                           <h4 className="text-base font-bold text-white mb-2">{f.label}</h4>
+                           <h4 className="text-base font-bold text-white mb-2 group-hover:text-violet-300 transition-colors">{f.label}</h4>
                            <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-3">{f.description}</p>
                         </div>
                      </div>
