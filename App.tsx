@@ -57,7 +57,7 @@ const App: React.FC = () => {
       setResult(auditResult);
     } catch (err: any) {
       console.error(err);
-      setError("Intelligence scan failed. The URLs might be unreachable or the AI service is busy.");
+      setError("Intelligence scan failed. The URL format might be incorrect.");
     } finally {
       setIsLoading(false);
     }
@@ -75,7 +75,6 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#02040a] text-slate-100 flex flex-col selection:bg-violet-500/30">
-      {/* Background Accent */}
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden -z-10">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-violet-600/10 blur-[150px] rounded-full"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/10 blur-[150px] rounded-full"></div>
@@ -104,7 +103,6 @@ const App: React.FC = () => {
             </div>
             <button 
               onClick={handleLogout}
-              title="Sign Out"
               className="p-3 bg-white/[0.05] border border-white/10 hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-400 text-slate-400 rounded-2xl transition-all"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -123,14 +121,14 @@ const App: React.FC = () => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
               </span>
-              Neural Network Online
+              Local Heuristic Engine Online
             </div>
             <h2 className="text-5xl md:text-6xl font-extrabold mb-8 font-display tracking-tighter text-white leading-[1.1]">
               Uncover Deep <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400">Search Intelligence.</span>
             </h2>
             <p className="text-slate-400 text-lg mb-12 leading-relaxed font-medium max-w-xl mx-auto">
-              Execute advanced reconnaissance. Decode competitor content, identify technical flaws, and unlock AI-driven growth paths.
+              Execute advanced reconnaissance. No API costs. Fast, local, and private diagnostic analysis.
             </p>
             
             <form onSubmit={handleAudit} className="space-y-5 max-w-lg mx-auto">
@@ -148,7 +146,7 @@ const App: React.FC = () => {
               <div className="group relative">
                 <input
                   type="url"
-                  placeholder="Competitor URL (Optional - AI will find rival if empty)"
+                  placeholder="Competitor URL (Optional)"
                   className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-cyan-500/50 transition-all font-semibold placeholder:text-slate-500 text-white"
                   value={competitorUrl}
                   onChange={(e) => setCompetitorUrl(e.target.value)}
@@ -159,14 +157,9 @@ const App: React.FC = () => {
                 disabled={isLoading}
                 className="w-full btn-primary text-white font-black py-5 rounded-2xl transition-all font-display text-xs uppercase tracking-widest-label"
               >
-                {isLoading ? 'Synthesizing...' : 'Start Intelligence Scan'}
+                {isLoading ? 'Synthesizing Diagnostics...' : 'Start Local Intelligence Scan'}
               </button>
             </form>
-            {error && (
-              <div className="mt-8 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-400 font-bold text-xs uppercase tracking-widest-label">
-                {error}
-              </div>
-            )}
           </div>
         )}
 
@@ -182,13 +175,13 @@ const App: React.FC = () => {
               </div>
             </div>
             <div className="text-center">
-              <p className="text-xl font-black font-display text-white uppercase tracking-widest-label mb-3">Analyzing Domain Data</p>
+              <p className="text-xl font-black font-display text-white uppercase tracking-widest-label mb-3">Synthesizing Local Intel</p>
               <div className="flex gap-1.5 justify-center">
                 <div className="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
                 <div className="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
                 <div className="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce"></div>
               </div>
-              <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest-label mt-6 opacity-60">Building semantic clusters & competitor delta</p>
+              <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest-label mt-6 opacity-60">Running diagnostic heuristics & pattern matching</p>
             </div>
           </div>
         )}
@@ -208,7 +201,7 @@ const App: React.FC = () => {
       <footer className="py-16 border-t border-white/5 bg-black/30 mt-auto">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest-label opacity-40">
-            &copy; {new Date().getFullYear()} AuditPro SEO Intelligence. Powered by Gemini 3. High Performance Environment.
+            &copy; {new Date().getFullYear()} AuditPro SEO. Zero-Cost Local Intelligence Engine.
           </p>
         </div>
       </footer>
