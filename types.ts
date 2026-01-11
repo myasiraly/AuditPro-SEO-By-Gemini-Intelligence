@@ -12,14 +12,33 @@ export interface StrategicGap {
   remedy: string;
 }
 
+export interface SEOFinding {
+  category: string;
+  label: string;
+  status: 'Pass' | 'Warning' | 'Critical';
+  value: string;
+  impact: 'High' | 'Medium' | 'Low';
+  description: string;
+}
+
 export interface TrafficDataPoint {
   date: string;
   visits: number;
+  organic: number;
+  paid: number;
+}
+
+export interface IndustryBenchmark {
+  metric: string;
+  industryAvg: string;
+  targetValue: string;
+  competitorValue: string;
+  status: 'Above' | 'Below' | 'Equal';
 }
 
 export interface CompetitiveIntelligence {
   estimatedPpcValue: string;
-  serpFeatures: { feature: string; ownedByTarget: boolean; ownedByCompetitor: boolean }[];
+  serpFeatures: { feature: string; ownedByTarget: boolean; ownedByCompetitor: boolean; probability: number }[];
   contentVelocity: string;
   keywordOverlap: {
     shared: number;
@@ -33,15 +52,13 @@ export interface CompetitiveIntelligence {
     estimatedMonthlySpend: string;
     adStrategy: string;
     topPaidKeywords: { keyword: string; cpc: string; position: number }[];
+    adCopyThemes: string[];
   };
-  keywordGaps?: {
-    keyword: string;
-    targetRank: string;
-    competitorRank: number;
-    volume: string;
-    intent: string;
-    opportunityScore: number;
-  }[];
+  industryBenchmarks: IndustryBenchmark[];
+  marketShareTrend: { date: string; targetShare: number; competitorShare: number }[];
+  visibilityIndex: number;
+  semanticVelocity: number;
+  rankingVolatility: number;
 }
 
 export interface SEOAuditData {
@@ -75,6 +92,17 @@ export interface SEOAuditData {
     suggestions: string[];
     mobileFriendly: boolean;
     performanceScore: number;
+    sitemapStatus: string;
+    serverProtocol: string;
+    cachingStatus: string;
+    compressionType: string;
+    ttfb: string;
+    domSize: number;
+    hydrationLag: string;
+    unusedByteBloat: string;
+    renderBlockingCount: number;
+    breadcrumbsStatus: string;
+    httpStatusCodes: { code: number; percentage: number }[];
     brokenInternalLinks: {
       count: number;
       list: string[];
@@ -87,6 +115,12 @@ export interface SEOAuditData {
       orphanPagesCount: number;
       orphanPagesList: string[];
       internalLinkScore: number;
+      maxDepth: number;
+    };
+    schemaMarkup: {
+      detectedTypes: string[];
+      validationScore: number;
+      missingCriticalTypes: string[];
     };
   };
   onPage: {
@@ -100,16 +134,25 @@ export interface SEOAuditData {
     h1OptimizationScore: number;
     keywordOptimizationScore: number;
     actionableSuggestions: string[];
-    topOnPageKeywords: { keyword: string; density: number; prominence: string }[];
+    topOnPageKeywords: { keyword: string; density: number; prominence: string; position?: string }[];
+    findings: SEOFinding[];
+    semanticRelevanceScore: number;
+    contentFreshness: number;
+    entityCount: number;
+    entitiesDetected: string[];
+    keywordCannibalizationRisk: number;
   };
   organicIntel: {
     estimatedMonthlyTraffic: number;
+    trafficSources: { source: string; percentage: number }[];
     dailyTrafficStats: TrafficDataPoint[];
     topKeywords: {
       keyword: string;
       volume: string;
       difficulty: number;
       intent: string;
+      serpFeatures?: string[];
+      cpc?: string;
     }[];
     topPages: string[];
     gapAnalysis: {
@@ -118,22 +161,30 @@ export interface SEOAuditData {
       competitorUrl: string;
     }[];
     frequentTopics: string[];
-    competitorContentAnalysis?: {
-      contentTypes: { type: string; frequency: string; performance: string }[];
-      topPerformingContent: { title: string; url: string; strength: string }[];
-      contentStrategy: string;
-      winningTopics: string[];
-    };
     competitiveIntelligence?: CompetitiveIntelligence;
+  };
+  engagement: {
+    predictedCtr: number;
+    predictedDwellTime: string;
+    engagementScore: number;
+    scrollDepthPrediction: string;
+    serpPreview: {
+      title: string;
+      description: string;
+      displayUrl: string;
+    };
   };
   images: {
     overSizeLimit: number;
     missingAlt: number;
+    webpConversionRate: number;
   };
   content: {
     thinContentCount: number;
     duplicateContentHashes: number;
     avgWordCount: number;
+    readabilityGrade: string;
+    contentToCodeRatio: string;
   };
   coreWebVitals: {
     lcp: string;
@@ -142,6 +193,7 @@ export interface SEOAuditData {
     tti: string;
     tbt: string;
     speedIndex: string;
+    inp: string;
     assessment: 'PASSED' | 'FAILED';
   };
   authority: {
@@ -151,6 +203,17 @@ export interface SEOAuditData {
     referringDomains: number;
     topReferringDomains: string[];
     highValueTargetLinks?: string[];
+    findings: SEOFinding[];
+    linkGrowthTrend: { date: string; count: number }[];
+    anchorTextProfile: { label: string; percentage: number }[];
+    backlinkTypes: { type: string; percentage: number }[];
+    linkQualityScore: number;
+    referringIps: number;
+    followRatio: number;
+    tldDistribution: { tld: string; percentage: number }[];
+    historicalAuthority: { date: string; score: number }[];
+    brandSentiment: 'Positive' | 'Neutral' | 'Negative';
+    unlinkedBrandMentions: number;
   };
 }
 
@@ -159,6 +222,8 @@ export interface SWOTAnalysis {
   weaknesses: string[];
   opportunities: string[];
   threats: string[];
+  strategicPriority: string;
+  roadmapTitle: string;
 }
 
 export interface BlogPost {

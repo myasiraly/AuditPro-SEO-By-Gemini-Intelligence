@@ -56,10 +56,10 @@ const SWOTCard: React.FC<{ title: string, items: string[], color: 'teal' | 'rose
         </div>
         <h3 className="text-xl font-black font-display tracking-widest-label uppercase group-hover:text-white transition-colors">{title}</h3>
       </div>
-      <ul className="space-y-4">
+      <ul className="space-y-5">
         {items.map((item, i) => (
-          <li key={i} className="flex gap-4 text-[12px] text-slate-400 leading-relaxed font-semibold">
-            <span className="mt-2 w-1.5 h-1.5 rounded-full bg-current shrink-0 opacity-40"></span>
+          <li key={i} className="flex gap-4 text-[13px] text-slate-300 leading-relaxed font-semibold">
+            <span className="mt-2.5 w-1.5 h-1.5 rounded-full bg-current shrink-0 opacity-40"></span>
             {item}
           </li>
         ))}

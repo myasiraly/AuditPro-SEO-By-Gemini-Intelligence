@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AuditResult } from '../types';
 import { marked } from 'marked';
+import { GoogleGenAI } from "@google/genai";
 
 interface VirtualAssistantProps {
   auditResult: AuditResult;
@@ -31,28 +32,41 @@ const VirtualAssistant: React.FC<VirtualAssistantProps> = ({ auditResult }) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    const userMessage = input.toLowerCase();
+    const userMessage = input;
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsLoading(true);
 
-    // Simulate thinking delay
-    setTimeout(() => {
-      let response = "I'm analyzing that query. Can you be more specific about whether you want to improve **Performance**, **Content**, or **Backlinks**?";
+    try {
+      // COMMENT: Initializing GoogleGenAI with named parameter as required.
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      
+      // COMMENT: Utilizing Gemini 3 Flash for fast, context-aware SEO advisory responses.
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              { text: `Current SEO Audit Context: ${JSON.stringify(auditResult)}` },
+              { text: `User Question: ${userMessage}` }
+            ]
+          }
+        ],
+        config: {
+          systemInstruction: "You are a world-class senior SEO consultant. Answer user queries by analyzing the provided audit data for the target domain and its competitor. Provide specific, data-driven advice. Use Markdown for formatting.",
+          temperature: 0.7,
+        }
+      });
 
-      if (userMessage.includes('speed') || userMessage.includes('performance') || userMessage.includes('lcp')) {
-        response = `Based on my diagnostics, your performance score is **${auditResult.target.lighthouse?.performance}/100**. To improve, you should focus on **LCP (${auditResult.target.coreWebVitals?.lcp})**. Recommendations: \n1. Compress large assets.\n2. Enable lazy loading.\n3. Utilize browser caching.`;
-      } else if (userMessage.includes('keyword') || userMessage.includes('rank')) {
-        response = `You're currently tracking **${auditResult.target.organicIntel?.topKeywords?.length}** primary keywords. Your top opportunity is **"${auditResult.target.organicIntel?.topKeywords?.[0]?.keyword}"**. I recommend expanding your content cluster around this topic to build semantic authority.`;
-      } else if (userMessage.includes('competitor') || userMessage.includes('rival')) {
-        response = `Your main rival, **${new URL(auditResult.competitor?.url || '').hostname}**, is performing at a health index of **${auditResult.competitor?.healthScore}%**. Focus on their keyword gaps in the "Strategic Intel" tab to outrank them.`;
-      } else if (userMessage.includes('backlink') || userMessage.includes('authority')) {
-        response = `Your Domain Authority is currently **${auditResult.target.authority?.domainAuthority}**. You have **${auditResult.target.authority?.referringDomains}** referring domains. Look at the Acquisition Targets in the Authority tab to find high-value link opportunities.`;
-      }
-
-      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+      const assistantResponse = response.text?.trim() || "I'm currently recalibrating my intelligence stream. Please try rephrasing.";
+      setMessages(prev => [...prev, { role: 'assistant', content: assistantResponse }]);
+    } catch (err) {
+      console.error("Assistant sync failed:", err);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Deep intelligence sync failed. Please check your network connection or API quota." }]);
+    } finally {
       setIsLoading(false);
-    }, 600);
+    }
   };
 
   return (
