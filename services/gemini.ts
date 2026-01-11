@@ -3,9 +3,8 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { AuditResult, ContentPlan, BlogPost, SEOAuditData, SWOTAnalysis, TrafficDataPoint, SEOFinding, CompetitiveIntelligence, IndustryBenchmark } from "../types";
 
 /**
- * AuditPro Intelligence Engine (V19.0 - Elite Strike Edition)
- * Optimized for high-fidelity long-form content synthesis and 
- * deep technical SEO diagnostics.
+ * AuditPro Intelligence Engine (V18.0 - Holistic Recon Edition)
+ * Powered by Gemini 3 Flash & Pro for deep diagnostic simulation.
  */
 export class GeminiService {
   private getSeed(str: string): number {
@@ -76,8 +75,8 @@ export class GeminiService {
       const findings: SEOFinding[] = [
         { category: "Semantic", label: "Entity Density", status: "Pass", value: "Verified", impact: "High", description: `Advanced NLP extraction identifies ${this.hashRange(s, 100, 20, 100)} unique entities. Strong alignment with '${name}' core business nodes.` },
         { category: "E-E-A-T", label: "Authorship Integrity", status: "Warning", value: "Partial", impact: "High", description: "Missing verified social proof for key contributors. Google favors 'Experience' markers." },
-        { category: "CTR", label: "Snippet Psychology", status: "Pass", value: "88%", impact: "Medium", description: "Title tags use power words effectively. Sentiment analysis indicates a high click appeal." },
-        { category: "UX", label: "Searcher Intent Fit", status: "Pass", value: "Excellent", impact: "High", description: "Content body maps 1:1 with informational intent cycles. High-resolution layout enhances dwell time." }
+        { category: "CTR", label: "Snippet Psychology", status: "Pass", value: "88%", impact: "Medium", description: "Title tags use power words effectively." },
+        { category: "UX", label: "Searcher Intent Fit", status: "Pass", value: "Excellent", impact: "High", description: "Content body maps 1:1 with informational intent cycles." }
       ];
 
       return {
@@ -115,9 +114,8 @@ export class GeminiService {
           findings: findings,
           actionableSuggestions: isTarget ? aiInsights.onPage : ["Increase first-hand experience citations", "Deploy FAQ schema"],
           topOnPageKeywords: [
-            { keyword: name, density: 3.2, prominence: "Primary", position: "H1 / Hero Section" },
-            { keyword: "architecture", density: 1.8, prominence: "Secondary", position: "H2 / Feature Grid" },
-            { keyword: "optimization", density: 1.2, prominence: "Tertiary", position: "Body Copy" }
+            { keyword: name, density: 3.2, prominence: "Primary", position: "Above Fold" },
+            { keyword: "architecture", density: 1.8, prominence: "Secondary", position: "H2" }
           ],
           semanticRelevanceScore: 96, contentFreshness: 88, entityCount: 42,
           entitiesDetected: ["Enterprise", "Cloud", "SaaS", "ROI", "Optimization"],
@@ -130,7 +128,7 @@ export class GeminiService {
           scrollDepthPrediction: "78%",
           serpPreview: {
             title: `${name.toUpperCase()} Solutions - The #1 Enterprise Hub`,
-            description: `Discover how ${name} revolutionizes the industry with high-fidelity architecture. Learn about our ROI optimization strategies and more.`,
+            description: `Discover how ${name} revolutionizes the industry with high-fidelity architecture.`,
             displayUrl: `www.${domain} › solutions`
           }
         },
@@ -215,23 +213,10 @@ export class GeminiService {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Perform a master content strategy synthesis for ${result.target.url}. 
-      Task: Generate a 30-day SEO content offensive roadmap. NO DAYS SKIPPED.
-      
-      Strategic Directives:
-      1. Unique, non-repetitive topics targeting 2025/2026 search trends (SGE, Voice AI, Generative Engine Optimization).
-      2. The plan must scale vertically from Top-of-Funnel (TOFU) to Bottom-of-Funnel (BOFU).
-      3. Focus on bridging the gap found in reconnaissance: ${result.swot.opportunities.join(', ')}.
-      
-      Return as JSON with:
-      - strategySummary: A 2-3 sentence overview of the market takeover logic.
-      - posts: Array of EXACTLY 30 objects, each containing:
-          - day: Number (1-30)
-          - title: High-CTR, professional title
-          - outline: A dense 2-sentence summary of the research required.
-          - targetKeywords: Array of 3-5 high-value terms.
-          - funnelStage: "TOFU", "MOFU", or "BOFU"
-          - suggestedWordCount: Minimum 1500 words for deep-dive authority.`,
+      contents: `Generate a 30-day SEO content plan for ${result.target.url}. 
+      The goal is to address these opportunities: ${result.swot.opportunities.join(', ')}.
+      Return a JSON object with 'strategySummary' (string) and 'posts' (array of objects).
+      Each post must have: day (1-30), title, outline, targetKeywords (array), funnelStage (TOFU, MOFU, or BOFU), and suggestedWordCount.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -269,30 +254,14 @@ export class GeminiService {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: `Synthesize an ELITE, technical SEO deep-dive article.
-      
-      TITLE: ${post.title}
-      TARGET DEPTH: 1,800+ Words (Authentic, NO FLUFF)
-      FUNNEL STAGE: ${post.funnelStage}
-      CONTEXT: ${post.outline}
-      KEYWORDS: ${post.targetKeywords.join(', ')}
-      
-      EXHAUSTIVE ARTICLE STRUCTURE:
-      1. H1 Title
-      2. Executive Summary: High-level impact for stakeholders.
-      3. The 2025 Search Landscape: Contextualize the topic within SGE/AI Engine behavior.
-      4. Technical Deep-Dive: Use H2/H3. Provide complex technical logic, code snippets (e.g., JSON-LD schema), and architectural diagrams (described in text).
-      5. Information Gain & EEAT: Provide unique perspectives that current SERPs are missing.
-      6. NLP Entity Optimization: Map this content to the broader entity graph.
-      7. Implementation Roadmap: Step-by-step actionable guide.
-      8. ROI & Success Metrics: How to measure the impact of this asset.
-      9. Conclusion: Strategic future-proofing.
-      
-      TONE: World-class senior SEO architect. Authoritative, dense with value, and highly technical. 
-      FORMAT: Markdown. Provide information gain in every paragraph.`,
+      contents: `Write a 1500+ word expert SEO blog post.
+      Title: ${post.title}
+      Context: ${post.outline}
+      Target Keywords: ${post.targetKeywords.join(', ')}
+      Funnel Stage: ${post.funnelStage}
+      Maintain high E-E-A-T, use Markdown for structure, and provide actionable deep-dives.`,
       config: {
-        temperature: 0.85,
-        topP: 0.95
+        temperature: 0.7,
       }
     });
 
