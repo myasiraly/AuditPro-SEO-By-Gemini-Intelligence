@@ -11,16 +11,16 @@ interface BlogContentPlanViewProps {
 const BlogContentPlanView: React.FC<BlogContentPlanViewProps> = ({ plan }) => {
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="bg-gradient-to-br from-blue-600/10 via-indigo-600/10 to-transparent border border-white/5 p-12 rounded-[40px] shadow-2xl relative overflow-hidden">
+      <div className="bg-gradient-to-br from-violet-600/10 via-indigo-600/10 to-transparent border border-white/5 p-12 rounded-[40px] shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 p-8 opacity-5">
            <svg className="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h10a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
         </div>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
           <h3 className="text-3xl font-extrabold flex items-center gap-3 text-white font-display tracking-tight">
-            <span className="w-1.5 h-8 bg-blue-500 rounded-full"></span>
+            <span className="w-1.5 h-8 bg-violet-500 rounded-full"></span>
             30-Day Content Strike Plan
           </h3>
-          <span className="px-4 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest-label">
+          <span className="px-4 py-1.5 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400 text-[10px] font-black uppercase tracking-widest-label">
             {plan.posts.length} Targeted Assets
           </span>
         </div>
@@ -71,7 +71,7 @@ const BlogPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
 
   return (
     <>
-      <div className="bg-slate-900/50 border border-white/5 rounded-[32px] p-8 hover:border-blue-500/30 transition-all duration-500 flex flex-col group relative backdrop-blur-sm">
+      <div className="bg-slate-900/50 border border-white/5 rounded-[32px] p-8 hover:border-violet-500/30 transition-all duration-500 flex flex-col group relative backdrop-blur-sm">
         <div className="flex justify-between items-center mb-6">
           <div className="bg-slate-800/80 rounded-xl px-4 py-1.5 text-[11px] font-black text-slate-400 uppercase tracking-widest-label border border-white/5">
             Day {post.day}
@@ -81,7 +81,7 @@ const BlogPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
           </span>
         </div>
         
-        <h4 className="text-xl font-extrabold text-white mb-4 group-hover:text-blue-400 transition-colors leading-tight font-display tracking-tight h-14 line-clamp-2">
+        <h4 className="text-xl font-extrabold text-white mb-4 group-hover:text-violet-400 transition-colors leading-tight font-display tracking-tight h-14 line-clamp-2">
           {post.title}
         </h4>
         
@@ -95,13 +95,13 @@ const BlogPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
           
           <div className="flex justify-between items-center bg-white/[0.02] p-3 rounded-2xl border border-white/5">
             <span className="text-[10px] text-slate-600 font-black uppercase tracking-widest-label">Word Target</span>
-            <span className="text-xs text-blue-400 font-extrabold font-display">{post.suggestedWordCount}+ words</span>
+            <span className="text-xs text-violet-400 font-extrabold font-display">{post.suggestedWordCount}+ words</span>
           </div>
         </div>
         
         <div className="mt-auto space-y-6">
           <div className="pt-6 border-t border-white/5">
-            <h5 className="text-[9px] font-black text-slate-600 uppercase mb-3 tracking-widest-label">Keywords</h5>
+            <h5 className="text-[9px] font-black text-slate-600 uppercase mb-3 tracking-widest-label">Primary Keywords</h5>
             <div className="flex flex-wrap gap-2">
               {post.targetKeywords.map((keyword, i) => (
                 <span key={i} className="text-[10px] font-bold text-slate-400 bg-white/5 px-3 py-1.5 rounded-xl border border-white/5">
@@ -114,7 +114,7 @@ const BlogPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
           <button
             onClick={handleWriteBlog}
             disabled={isWriting}
-            className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 font-black text-xs uppercase tracking-widest-label transition-all flex items-center justify-center gap-3 group/btn shadow-xl shadow-blue-600/10 text-white"
+            className="w-full py-4 rounded-2xl bg-violet-600 hover:bg-violet-500 disabled:bg-slate-800 disabled:text-slate-600 font-black text-xs uppercase tracking-widest-label transition-all flex items-center justify-center gap-3 group/btn shadow-xl shadow-violet-600/10 text-white"
           >
             {isWriting ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -123,7 +123,7 @@ const BlogPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
             )}
-            {isWriting ? 'Processing Deep Draft...' : 'Generate Full Content'}
+            {isWriting ? 'Synthesizing Deep Draft...' : 'Generate Full Content'}
           </button>
         </div>
       </div>
@@ -136,9 +136,9 @@ const BlogPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
               <div className="max-w-[80%]">
                 <h3 className="text-3xl font-extrabold text-white font-display tracking-tight leading-tight">{post.title}</h3>
                 <div className="flex items-center gap-3 mt-3">
-                  <span className="text-[10px] text-slate-500 font-black uppercase tracking-widest-label">Draft Status: Verified High-Fidelity</span>
+                  <span className="text-[10px] text-slate-500 font-black uppercase tracking-widest-label">Draft Status: Verified High-Fidelity V5</span>
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
-                  <span className="text-[10px] text-blue-500 font-black uppercase tracking-widest-label">{post.suggestedWordCount} Word Target</span>
+                  <span className="text-[10px] text-violet-500 font-black uppercase tracking-widest-label">{post.suggestedWordCount} Word Target Reached</span>
                 </div>
               </div>
               <button 
@@ -153,18 +153,18 @@ const BlogPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
             
             <div className="flex-1 overflow-y-auto p-12 custom-scrollbar bg-slate-950/20">
               <div 
-                className="prose prose-invert lg:prose-xl"
+                className="prose prose-invert lg:prose-xl max-w-none"
                 dangerouslySetInnerHTML={{ __html: marked.parse(fullPost) as string }}
               />
             </div>
 
             <div className="p-8 border-t border-white/5 flex items-center justify-between bg-slate-900/50 rounded-b-[40px]">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center text-violet-500">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
                 <div className="text-xs text-slate-500 font-bold uppercase tracking-widest-label">
-                  Local Synthesis Complete
+                  Local Heuristic Synthesis Complete
                 </div>
               </div>
               <button
@@ -172,12 +172,12 @@ const BlogPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
                   navigator.clipboard.writeText(fullPost);
                   alert("Long-form draft copied to clipboard.");
                 }}
-                className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest-label transition-all flex items-center gap-3 shadow-xl shadow-blue-600/20"
+                className="px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest-label transition-all flex items-center gap-3 shadow-xl shadow-violet-600/20"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                 </svg>
-                Copy Full Draft
+                Copy Content Asset
               </button>
             </div>
           </div>
