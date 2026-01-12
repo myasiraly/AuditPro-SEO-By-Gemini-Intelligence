@@ -156,6 +156,64 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                 <LighthouseGauge label="SEO Integrity" value={target.lighthouse.seo} />
               </div>
             </div>
+
+            <div className="glass-panel rounded-[40px] p-10">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+                <div>
+                  <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-2">Core Web Vitals Assessment</h3>
+                  <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest-label">28-Day Chrome User Experience Report (CrUX)</p>
+                </div>
+                <div className={`px-6 py-3 rounded-2xl border font-black text-xs uppercase tracking-widest-label flex items-center gap-3 ${
+                  target.coreWebVitals.assessment === 'PASSED' 
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                  : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                }`}>
+                  <span className={`w-2 h-2 rounded-full animate-pulse ${target.coreWebVitals.assessment === 'PASSED' ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                  Overall Assessment: {target.coreWebVitals.assessment}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <VitalsCard 
+                  label="LCP (Largest Contentful Paint)" 
+                  value={target.coreWebVitals.lcp} 
+                  threshold="2.5s" 
+                  failed={parseFloat(target.coreWebVitals.lcp) > 2.5}
+                  causes="Slow server response times (TTFB), render-blocking JavaScript/CSS, slow resource load times, or client-side rendering issues."
+                />
+                <VitalsCard 
+                  label="FID (First Input Delay)" 
+                  value={target.coreWebVitals.fid} 
+                  threshold="100ms" 
+                  failed={parseFloat(target.coreWebVitals.fid) > 100}
+                  causes="Heavy JavaScript execution, unoptimized main thread tasks, or large third-party script bundles blocking interaction."
+                />
+                <VitalsCard 
+                  label="CLS (Cumulative Layout Shift)" 
+                  value={target.coreWebVitals.cls} 
+                  threshold="0.1" 
+                  failed={parseFloat(target.coreWebVitals.cls) > 0.1}
+                />
+                <VitalsCard 
+                  label="INP (Interaction to Next Paint)" 
+                  value={target.coreWebVitals.inp} 
+                  threshold="200ms" 
+                  failed={parseFloat(target.coreWebVitals.inp) > 200}
+                />
+              </div>
+
+              {(parseFloat(target.coreWebVitals.lcp) > 2.5 || parseFloat(target.coreWebVitals.fid) > 100) && (
+                <div className="mt-12 p-8 bg-rose-500/5 border border-rose-500/10 rounded-[32px]">
+                   <h4 className="text-rose-400 text-[10px] font-black uppercase tracking-widest-label mb-4 flex items-center gap-2">
+                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                     Critical Vitals Warning
+                   </h4>
+                   <p className="text-slate-400 text-sm leading-relaxed font-medium">
+                     The site is currently failing Core Web Vitals guidelines. High LCP/FID latency is highly correlated with decreased conversion rates and lower organic ranking potential in the 2025 SGE era.
+                   </p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -368,59 +426,8 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                       <span className="text-xs font-black text-rose-400">{target.authority.toxicLinks} Nodes</span>
                     </div>
                     <p className="text-[10px] text-slate-500 leading-relaxed italic">
-                      Heuristic scan detected low-quality neighborhood footprints. Manual disavow of top {target.authority.toxicLinks} sources recommended.
+                      Heuristic scan detected low-quality neighborhood footprints. Manual disavow recommended.
                     </p>
-                 </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="glass-panel rounded-[40px] p-10">
-                <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10">Anchor Text Integrity</h3>
-                <div className="h-64">
-                   <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={target.authority.anchorTextProfile} layout="vertical">
-                         <XAxis type="number" hide />
-                         <YAxis dataKey="label" type="category" stroke="#475569" fontSize={9} width={80} fontWeight={700} />
-                         <Tooltip contentStyle={{ backgroundColor: '#000', border: 'none' }} />
-                         <Bar dataKey="percentage" fill="#6366f1" radius={[0, 8, 8, 0]} />
-                      </BarChart>
-                   </ResponsiveContainer>
-                </div>
-              </div>
-
-              <div className="glass-panel rounded-[40px] p-10">
-                 <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10">Link Tiers (TLD)</h3>
-                 <div className="h-64 relative">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                         <Pie data={target.authority.tldDistribution} dataKey="percentage" nameKey="tld" innerRadius={60} outerRadius={85} paddingAngle={8} stroke="none">
-                           {target.authority.tldDistribution.map((entry, index) => (
-                             <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                           ))}
-                         </Pie>
-                         <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                 </div>
-              </div>
-
-              <div className="glass-panel rounded-[40px] p-10">
-                 <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10">Target Outreach Nodes</h3>
-                 <div className="space-y-4">
-                    {(target.authority.highValueTargetLinks || []).map((site, i) => (
-                      <div key={i} className="flex items-center gap-4 p-4 bg-white/[0.02] border border-white/5 rounded-2xl group hover:border-violet-500/30 transition-all">
-                        <div className="w-8 h-8 rounded-lg bg-violet-600/10 flex items-center justify-center text-violet-500 text-[10px] font-black border border-violet-500/20">S</div>
-                        <div className="flex-1">
-                          <p className="text-xs font-bold text-slate-200 group-hover:text-white transition-colors">{site}</p>
-                          <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mt-0.5">High Potential</p>
-                        </div>
-                        <svg className="w-4 h-4 text-slate-700 group-hover:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                      </div>
-                    ))}
-                    {(!target.authority.highValueTargetLinks || target.authority.highValueTargetLinks.length === 0) && (
-                      <div className="text-center py-10 text-slate-600 text-[10px] font-black uppercase tracking-widest">No outreach targets identified.</div>
-                    )}
                  </div>
               </div>
             </div>
@@ -477,6 +484,25 @@ const OnPageStatusBadge: React.FC<{ status: 'Pass' | 'Warning' | 'Critical' }> =
   };
   return <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest-label border ${styles[status]}`}>{status}</span>;
 };
+
+const VitalsCard: React.FC<{ label: string, value: string, threshold: string, failed: boolean, causes?: string }> = ({ label, value, threshold, failed, causes }) => (
+  <div className={`p-6 rounded-3xl border transition-all hover:-translate-y-1 ${failed ? 'bg-rose-500/[0.03] border-rose-500/20 shadow-lg shadow-rose-500/5' : 'bg-emerald-500/[0.03] border-emerald-500/20 shadow-lg shadow-emerald-500/5'}`}>
+    <div className="flex justify-between items-center mb-6">
+      <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${failed ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
+        {failed ? 'FAILED' : 'PASSED'}
+      </span>
+      <span className="text-[10px] font-mono font-bold text-slate-500">Goal: &lt;{threshold}</span>
+    </div>
+    <h5 className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">{label}</h5>
+    <div className={`text-3xl font-black font-display tracking-tight mb-4 ${failed ? 'text-rose-400' : 'text-emerald-400'}`}>{value}</div>
+    {failed && causes && (
+      <div className="mt-4 pt-4 border-t border-rose-500/10">
+        <p className="text-[9px] text-rose-400/60 font-black uppercase tracking-widest mb-2">Common Causes:</p>
+        <p className="text-[10px] text-slate-500 leading-relaxed italic">{causes}</p>
+      </div>
+    )}
+  </div>
+);
 
 const LighthouseGauge: React.FC<{ label: string, value: number }> = ({ label, value }) => {
   const color = value >= 90 ? '#10b981' : value >= 50 ? '#f59e0b' : '#ef4444';
