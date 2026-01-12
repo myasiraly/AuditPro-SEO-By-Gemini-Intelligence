@@ -1,10 +1,9 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { AuditResult, ContentPlan, BlogPost, SEOAuditData, SEOFinding } from "../types";
 
 /**
- * AuditPro Intelligence Engine (V25.0 - Expert Research Edition)
- * Master-level SEO diagnostics, high-fidelity keyword intelligence, and 
+ * AuditPro Intelligence Engine (V26.0 - Strategic Domination Edition)
+ * Master-level SEO diagnostics, competitive tactical engine, and 
  * deep technical/semantic reconnaissance.
  */
 export class GeminiService {
@@ -27,7 +26,7 @@ export class GeminiService {
       Generate 12 high-ROI organic keyword nodes that represent the current 2025 search landscape.
       For each keyword, provide:
       - volume: (Estimated monthly)
-      - difficulty: (1-100 score)
+      - difficulty: (1-10 score)
       - intent: (Informational, Navigational, Commercial, or Transactional)
       - cpc: (Current market value)
       - conversionPotential: (1-100 ROI score)
@@ -80,84 +79,38 @@ export class GeminiService {
       ai.models.generateContent({
         model: 'gemini-3-pro-preview',
         contents: `Execute deep SEO reconnaissance for ${targetUrl} vs ${competitorUrl || 'market leaders'}.
-        Diagnostic Focus: 2025/2026 AI-First Search Landscape (SGE/GEO).
+        Focus: 2025 AI-First Search (SGE/GEO), E-E-A-T, and Topical Moats.
         
-        Provide high-fidelity research data for:
+        Output Requirements (JSON):
         1. findings: 6 highly specific insights across On-Page, Technical, and Authority.
-        2. technicalDebtLedger: 5 critical infrastructure issues (Rendering, Hydration, Protocol, security).
-        3. semanticMap: 4 topical nodes with coverage depth and gap analysis.
-        4. swot: Advanced SWOT matrix including "Strategic Priority".
-        5. competitiveIntelligence: Position, recommendations, and feature gap probability.
-        6. renderingInsight: A detailed note on the site's detected rendering strategy impact on SEO.
-        7. authorityIntel: Generate a list of 5 "High-Value Target Links" (authoritative sites in this niche to target), and a 12-month "Link Growth Forecast" based on current momentum.
-        
-        Ensure findings are based on modern SEO best practices (EEAT, Information Gain, Core Web Vitals INP).
-        Return in JSON format.`,
+        2. technicalDebtLedger: 5 issues (Rendering, Hydration, etc).
+        3. semanticMap: 4 topical nodes with coverage depth.
+        4. swot: Advanced matrix.
+        5. competitive:
+           - marketPosition: (Leader, Challenger, Niche, Laggard)
+           - tacticalRecommendations: 6 data-driven moves with {title, action, impact}.
+           - serpFeatures: Analysis of current feature ownership.
+           - serpFeatureOptimization: 4 specific tactics to win 'Featured Snippets', 'PAA', or 'SGE citation' with {feature, tactic, goal}.
+        6. renderingInsight: Strategy impact.
+        7. authorityIntel: Generate a list of 5 "High-Value Target Links" (authoritative sites in this niche to target), and a 12-month "Link Growth Forecast" based on current momentum.`,
         config: { 
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,
             properties: {
-              findings: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    category: { type: Type.STRING },
-                    label: { type: Type.STRING },
-                    status: { type: Type.STRING, enum: ["Pass", "Warning", "Critical"] },
-                    value: { type: Type.STRING },
-                    impact: { type: Type.STRING, enum: ["High", "Medium", "Low"] },
-                    description: { type: Type.STRING }
-                  }
-                }
-              },
-              technicalDebtLedger: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    issue: { type: Type.STRING },
-                    impact: { type: Type.STRING },
-                    effort: { type: Type.STRING },
-                    recommendation: { type: Type.STRING }
-                  }
-                }
-              },
-              semanticMap: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    topic: { type: Type.STRING },
-                    coverage: { type: Type.NUMBER },
-                    gapImportance: { type: Type.STRING }
-                  }
-                }
-              },
+              findings: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { category: { type: Type.STRING }, label: { type: Type.STRING }, status: { type: Type.STRING }, value: { type: Type.STRING }, impact: { type: Type.STRING }, description: { type: Type.STRING } } } },
+              technicalDebtLedger: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { issue: { type: Type.STRING }, impact: { type: Type.STRING }, effort: { type: Type.STRING }, recommendation: { type: Type.STRING } } } },
+              semanticMap: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { topic: { type: Type.STRING }, coverage: { type: Type.NUMBER }, gapImportance: { type: Type.STRING } } } },
               renderingInsight: { type: Type.STRING },
-              authorityIntel: {
-                type: Type.OBJECT,
-                properties: {
-                  highValueTargetLinks: { type: Type.ARRAY, items: { type: Type.STRING } },
-                  growthForecast: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { date: { type: Type.STRING }, count: { type: Type.NUMBER } } } }
-                }
-              },
-              swot: {
-                type: Type.OBJECT,
-                properties: {
-                  strengths: { type: Type.ARRAY, items: { type: Type.STRING } },
-                  weaknesses: { type: Type.ARRAY, items: { type: Type.STRING } },
-                  opportunities: { type: Type.ARRAY, items: { type: Type.STRING } },
-                  threats: { type: Type.ARRAY, items: { type: Type.STRING } },
-                  strategicPriority: { type: Type.STRING }
-                }
-              },
+              authorityIntel: { type: Type.OBJECT, properties: { highValueTargetLinks: { type: Type.ARRAY, items: { type: Type.STRING } }, growthForecast: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { date: { type: Type.STRING }, count: { type: Type.NUMBER } } } } } },
+              swot: { type: Type.OBJECT, properties: { strengths: { type: Type.ARRAY, items: { type: Type.STRING } }, weaknesses: { type: Type.ARRAY, items: { type: Type.STRING } }, opportunities: { type: Type.ARRAY, items: { type: Type.STRING } }, threats: { type: Type.ARRAY, items: { type: Type.STRING } }, strategicPriority: { type: Type.STRING } } },
               competitive: {
                 type: Type.OBJECT,
                 properties: {
-                  tacticalRecommendations: { type: Type.ARRAY, items: { type: Type.STRING } },
-                  marketPosition: { type: Type.STRING }
+                  tacticalRecommendations: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { title: { type: Type.STRING }, action: { type: Type.STRING }, impact: { type: Type.STRING } } } },
+                  marketPosition: { type: Type.STRING },
+                  serpFeatures: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { feature: { type: Type.STRING }, ownedByTarget: { type: Type.BOOLEAN }, ownedByCompetitor: { type: Type.BOOLEAN }, probability: { type: Type.NUMBER } } } },
+                  serpFeatureOptimization: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { feature: { type: Type.STRING }, tactic: { type: Type.STRING }, goal: { type: Type.STRING } } } }
                 }
               }
             }
@@ -176,10 +129,10 @@ export class GeminiService {
         findings: [], 
         technicalDebtLedger: [], 
         semanticMap: [], 
-        renderingInsight: "Heuristic scan suggests standard hybrid rendering approach.",
+        renderingInsight: "Heuristic scan suggests standard rendering.",
         authorityIntel: { highValueTargetLinks: [], growthForecast: [] },
-        swot: { strengths: [], weaknesses: [], opportunities: [], threats: [], strategicPriority: "Fortify semantic clusters." },
-        competitive: { tacticalRecommendations: [], marketPosition: "Market Challenger" }
+        swot: { strengths: [], weaknesses: [], opportunities: [], threats: [], strategicPriority: "Dominate semantic clusters." },
+        competitive: { tacticalRecommendations: [], marketPosition: "Challenger", serpFeatures: [], serpFeatureOptimization: [] }
       };
     }
 
@@ -194,7 +147,7 @@ export class GeminiService {
         totalPages: this.hashRange(s, 30, 800, 25000),
         healthScore: this.hashRange(s, 35, 75, 99),
         lighthouse: { performance: 95, accessibility: 100, bestPractices: 98, seo: 99 },
-        errors: { count: 2, details: ["Legacy bundle size", "Redundant polyfills detected"] },
+        errors: { count: 2, details: ["Legacy bundle size", "Redundant polyfills"] },
         warnings: { count: 8, details: ["Large LCP asset", "Unoptimized font loading"] },
         notices: { count: 14, details: ["Schema version lag", "Alt-tag inconsistencies"] },
         technical: {
@@ -238,10 +191,14 @@ export class GeminiService {
           gapAnalysis: [], frequentTopics: [name, "optimization"],
           competitiveIntelligence: {
             estimatedPpcValue: `$${this.hashRange(s, 80, 5000, 50000).toLocaleString()}`,
-            serpFeatures: [{ feature: "SGE Snippet", ownedByTarget: true, ownedByCompetitor: false, probability: 0.94 }],
+            serpFeatures: isTarget ? aiInsights.competitive.serpFeatures : [
+              { feature: "Featured Snippet", ownedByTarget: true, ownedByCompetitor: false, probability: 0.9 },
+              { feature: "SGE Answer", ownedByTarget: false, ownedByCompetitor: true, probability: 0.7 }
+            ],
             contentVelocity: "High", keywordOverlap: { shared: 450, targetUnique: 1200, competitorUnique: 900 },
             marketPosition: isTarget ? aiInsights.competitive.marketPosition : "Leader",
             tacticalRecommendations: isTarget ? aiInsights.competitive.tacticalRecommendations : [],
+            serpFeatureOptimization: isTarget ? aiInsights.competitive.serpFeatureOptimization : [],
             strategicGaps: [], industryBenchmarks: [], marketShareTrend: [], visibilityIndex: 88, semanticVelocity: 92, rankingVolatility: 12
           }
         },
@@ -253,7 +210,7 @@ export class GeminiService {
           topReferringDomains: ["Forbes", "TechCrunch", "Wikipedia", "MarketWatch", "FastCompany", "TechRadar"], 
           highValueTargetLinks: isTarget ? aiInsights.authorityIntel.highValueTargetLinks : ["Industry Weekly", "The Deep Dive", "Growth Node"],
           findings: [
-            { category: "Trust", label: "Link Sentiment", status: "Pass", value: "Positive", impact: "High", description: "Inbound anchors overwhelmingly carry positive sentiment markers. Brand association is top-tier." },
+            { category: "Trust", label: "Link Sentiment", status: "Pass", value: "Positive", impact: "High", description: "Inbound anchors overwhelmingly carry positive sentiment markers." },
             { category: "Authority", label: "Semantic Cohesion", status: "Pass", value: "Verified", impact: "High", description: "Niche relevance of referring pages is 94% aligned with core business nodes." }
           ],
           linkGrowthTrend: isTarget ? aiInsights.authorityIntel.growthForecast : Array.from({ length: 12 }, (_, i) => ({ date: `2024-${(i+1).toString().padStart(2, '0')}`, count: refDomains - (12-i)*100 })), 

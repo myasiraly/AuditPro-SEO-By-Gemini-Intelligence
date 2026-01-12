@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { AuditResult, ContentPlan, StrategicGap, SEOFinding } from '../types';
 import MetricCard from './MetricCard';
@@ -48,7 +47,7 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-12">
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <span className="px-3 py-1 rounded-lg bg-violet-500/10 text-violet-400 text-[9px] font-black uppercase tracking-widest-label border border-violet-500/20">V25.0 Master Research</span>
+            <span className="px-3 py-1 rounded-lg bg-violet-500/10 text-violet-400 text-[9px] font-black uppercase tracking-widest-label border border-violet-500/20">V26.0 Strategic Domination</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-extrabold text-white font-display tracking-tighter flex flex-wrap items-center gap-5 leading-none">
             {target.url ? new URL(target.url).hostname : 'Target Domain'}
@@ -201,18 +200,6 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                   failed={parseFloat(target.coreWebVitals.inp) > 200}
                 />
               </div>
-
-              {(parseFloat(target.coreWebVitals.lcp) > 2.5 || parseFloat(target.coreWebVitals.fid) > 100) && (
-                <div className="mt-12 p-8 bg-rose-500/5 border border-rose-500/10 rounded-[32px]">
-                   <h4 className="text-rose-400 text-[10px] font-black uppercase tracking-widest-label mb-4 flex items-center gap-2">
-                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                     Critical Vitals Warning
-                   </h4>
-                   <p className="text-slate-400 text-sm leading-relaxed font-medium">
-                     The site is currently failing Core Web Vitals guidelines. High LCP/FID latency is highly correlated with decreased conversion rates and lower organic ranking potential in the 2025 SGE era.
-                   </p>
-                </div>
-              )}
             </div>
           </div>
         )}
@@ -260,6 +247,76 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
           </div>
         )}
 
+        {activeTab === 'competitive' && (
+          <div className="space-y-12 animate-in fade-in duration-500">
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="glass-panel rounded-[40px] p-10 flex flex-col justify-between border-violet-500/20 bg-violet-500/[0.02]">
+                  <div>
+                    <h3 className="text-[11px] font-black text-violet-400 uppercase tracking-widest-label mb-8">Market Positioning</h3>
+                    <div className="text-5xl font-black text-white font-display tracking-tighter mb-4">{compIntel?.marketPosition}</div>
+                    <p className="text-slate-400 text-xs font-medium leading-relaxed">Strategic heuristic identifies the target as a rising force in the niche hierarchy.</p>
+                  </div>
+                </div>
+                
+                <div className="lg:col-span-2 glass-panel rounded-[40px] p-10">
+                  <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10 flex items-center gap-2">
+                    <span className="w-1 h-5 bg-violet-500 rounded-full"></span>
+                    SERP Feature Ownership Comparison
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {compIntel?.serpFeatures.map((feat, i) => (
+                      <div key={i} className="p-5 bg-white/[0.02] border border-white/5 rounded-3xl flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-300">{feat.feature}</span>
+                        <div className="flex gap-4">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${feat.ownedByTarget ? 'bg-violet-500/20 border-violet-500' : 'bg-slate-800/20 border-slate-800'}`}>
+                            <span className="text-[8px] font-black text-white">T</span>
+                          </div>
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${feat.ownedByCompetitor ? 'bg-rose-500/20 border-rose-500' : 'bg-slate-800/20 border-slate-800'}`}>
+                            <span className="text-[8px] font-black text-white">C</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+             </div>
+
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="glass-panel rounded-[40px] p-10 border-indigo-500/10">
+                   <h3 className="text-[11px] font-black text-indigo-400 uppercase tracking-widest-label mb-10">Strategic Tactical Domination Engine</h3>
+                   <div className="space-y-4">
+                      {compIntel?.tacticalRecommendations.map((rec, i) => (
+                        <div key={i} className="flex gap-4 p-5 bg-white/[0.01] border border-white/5 rounded-3xl hover:border-indigo-500/30 transition-all group">
+                           <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-black text-xs shrink-0 group-hover:scale-110 transition-transform">{i+1}</div>
+                           <div className="self-center">
+                              <h5 className="text-sm text-white font-bold mb-1">{rec.title}</h5>
+                              <p className="text-[11px] text-slate-400 leading-relaxed">{rec.action}</p>
+                              <span className="mt-2 inline-block px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[8px] font-black uppercase tracking-widest-label">Impact: {rec.impact}</span>
+                           </div>
+                        </div>
+                      ))}
+                   </div>
+                </div>
+
+                <div className="glass-panel rounded-[40px] p-10 border-cyan-500/10">
+                   <h3 className="text-[11px] font-black text-cyan-400 uppercase tracking-widest-label mb-10">SERP Feature Opportunity Map</h3>
+                   <div className="space-y-6">
+                      {compIntel?.serpFeatureOptimization.map((opt, i) => (
+                        <div key={i} className="space-y-3 p-6 bg-white/[0.01] border border-white/5 rounded-[32px] hover:bg-cyan-500/[0.02] transition-all">
+                           <div className="flex justify-between items-center">
+                              <span className="text-xs font-black text-white uppercase tracking-widest-label">{opt.feature}</span>
+                              <span className="px-2 py-0.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-[8px] font-black uppercase tracking-widest">High Impact</span>
+                           </div>
+                           <p className="text-[11px] text-slate-400 leading-relaxed font-bold italic mb-2">Tactic: {opt.tactic}</p>
+                           <p className="text-[10px] text-slate-600 uppercase tracking-widest-label">Goal: {opt.goal}</p>
+                        </div>
+                      ))}
+                   </div>
+                </div>
+             </div>
+          </div>
+        )}
+
         {activeTab === 'keywords' && (
           <div className="space-y-12 animate-in fade-in duration-500">
              <div className="glass-panel rounded-[40px] p-10 overflow-hidden">
@@ -269,7 +326,7 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                     Deep Research Intelligence
                   </h3>
                   <div className="flex items-center gap-3 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 text-[9px] font-black uppercase tracking-widest-label">
-                    Research accuracy verified V25.0
+                    Research accuracy verified V26.0
                   </div>
                 </div>
                 
@@ -300,9 +357,9 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                           <td className="py-6 text-center text-[10px] font-black text-slate-400">{kw.volume}</td>
                           <td className="py-6 text-center">
                             <div className="flex flex-col items-center gap-1.5">
-                              <span className={`text-[10px] font-black ${kw.difficulty > 70 ? 'text-rose-400' : kw.difficulty > 40 ? 'text-amber-400' : 'text-emerald-400'}`}>{kw.difficulty}</span>
+                              <span className={`text-[10px] font-black ${kw.difficulty > 7 ? 'text-rose-400' : kw.difficulty > 4 ? 'text-amber-400' : 'text-emerald-400'}`}>{kw.difficulty}</span>
                               <div className="w-10 h-1 bg-white/5 rounded-full overflow-hidden">
-                                <div className={`${kw.difficulty > 70 ? 'bg-rose-500' : kw.difficulty > 40 ? 'bg-amber-500' : 'bg-emerald-500'} h-full`} style={{ width: `${kw.difficulty}%` }}></div>
+                                <div className={`${kw.difficulty > 7 ? 'bg-rose-500' : kw.difficulty > 4 ? 'bg-amber-500' : 'bg-emerald-500'} h-full`} style={{ width: `${kw.difficulty * 10}%` }}></div>
                               </div>
                             </div>
                           </td>
@@ -344,41 +401,6 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                 <MetricCard title="Readability" value={target.content.readabilityGrade} subtitle="Structural Tone" color="violet" />
                 <MetricCard title="Entity Depth" value={target.onPage.entityCount} subtitle="NLP Entity Count" color="cyan" />
                 <MetricCard title="Word Count" value={target.content.avgWordCount} subtitle="Avg. Pillar Length" color="indigo" />
-             </div>
-
-             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="glass-panel rounded-[40px] p-10">
-                  <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10">Deep Semantic Mapping</h3>
-                  <div className="space-y-8">
-                    {target.onPage.semanticMapInsights.map((map, i) => (
-                      <div key={i} className="space-y-4 p-6 bg-white/[0.02] border border-white/5 rounded-3xl">
-                        <div className="flex justify-between items-center">
-                          <h4 className="text-sm font-black text-white uppercase tracking-tight">{map.topic}</h4>
-                          <span className="text-[10px] font-black text-violet-400">{map.coverage}% Match</span>
-                        </div>
-                        <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                            <div className="bg-violet-600 h-full" style={{ width: `${map.coverage}%` }}></div>
-                        </div>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Strategic Gap: <span className="text-cyan-400">{map.gapImportance}</span></p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="glass-panel rounded-[40px] p-10 bg-white/[0.01]">
-                   <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10">Detailed On-Page Findings</h3>
-                   <div className="space-y-4">
-                      {target.onPage.findings.map((f, i) => (
-                        <div key={i} className="p-5 border border-white/5 bg-black/40 rounded-3xl group">
-                           <div className="flex justify-between items-center mb-2">
-                              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{f.category}</span>
-                              <OnPageStatusBadge status={f.status as any} />
-                           </div>
-                           <h5 className="text-xs font-bold text-white mb-2">{f.label}</h5>
-                           <p className="text-[11px] text-slate-500 leading-relaxed">{f.description}</p>
-                        </div>
-                      ))}
-                   </div>
-                </div>
              </div>
           </div>
         )}
@@ -431,6 +453,54 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                  </div>
               </div>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="glass-panel rounded-[40px] p-10">
+                <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10">Anchor Text Profile</h3>
+                <div className="h-64">
+                   <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={target.authority.anchorTextProfile} layout="vertical">
+                         <XAxis type="number" hide />
+                         <YAxis dataKey="label" type="category" stroke="#475569" fontSize={9} width={80} fontWeight={700} />
+                         <Tooltip contentStyle={{ backgroundColor: '#000', border: 'none' }} />
+                         <Bar dataKey="percentage" fill="#6366f1" radius={[0, 8, 8, 0]} />
+                      </BarChart>
+                   </ResponsiveContainer>
+                </div>
+              </div>
+
+              <div className="glass-panel rounded-[40px] p-10">
+                 <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10">TLD Distribution</h3>
+                 <div className="h-64 relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                         <Pie data={target.authority.tldDistribution} dataKey="percentage" nameKey="tld" innerRadius={60} outerRadius={85} paddingAngle={8} stroke="none">
+                           {target.authority.tldDistribution.map((entry, index) => (
+                             <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                           ))}
+                         </Pie>
+                         <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                 </div>
+              </div>
+
+              <div className="glass-panel rounded-[40px] p-10">
+                 <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10">High-Value Target Sites</h3>
+                 <div className="space-y-4">
+                    {(target.authority.highValueTargetLinks || []).map((site, i) => (
+                      <div key={i} className="flex items-center gap-4 p-4 bg-white/[0.02] border border-white/5 rounded-2xl group hover:border-violet-500/30 transition-all">
+                        <div className="w-8 h-8 rounded-lg bg-violet-600/10 flex items-center justify-center text-violet-500 text-[10px] font-black border border-violet-500/20">S</div>
+                        <div className="flex-1">
+                          <p className="text-xs font-bold text-slate-200 group-hover:text-white transition-colors">{site}</p>
+                          <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mt-0.5">Opportunity Node</p>
+                        </div>
+                        <svg className="w-4 h-4 text-slate-700 group-hover:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                      </div>
+                    ))}
+                 </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -441,12 +511,6 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
                <div className="w-24 h-1 bg-violet-600 mx-auto rounded-full"></div>
             </div>
             <SWOTAnalysisView swot={swot} />
-            <div className="glass-panel p-12 rounded-[50px] bg-violet-600/[0.02] border-violet-500/20 text-center">
-              <h3 className="text-[11px] font-black text-violet-400 uppercase tracking-widest-label mb-6">Strategic Master Priority</h3>
-              <p className="text-2xl font-black text-white font-display tracking-tight max-w-2xl mx-auto italic leading-tight">
-                "{swot.strategicPriority}"
-              </p>
-            </div>
           </div>
         )}
 

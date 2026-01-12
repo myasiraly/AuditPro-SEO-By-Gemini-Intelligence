@@ -1,4 +1,3 @@
-
 export interface GroundingSource {
   title: string;
   uri: string;
@@ -46,7 +45,7 @@ export interface CompetitiveIntelligence {
     competitorUnique: number;
   };
   marketPosition: 'Leader' | 'Challenger' | 'Niche' | 'Laggard';
-  tacticalRecommendations: string[];
+  tacticalRecommendations: { title: string; action: string; impact: string }[];
   strategicGaps: StrategicGap[];
   ppcIntel?: {
     estimatedMonthlySpend: string;
@@ -59,6 +58,7 @@ export interface CompetitiveIntelligence {
   visibilityIndex: number;
   semanticVelocity: number;
   rankingVolatility: number;
+  serpFeatureOptimization: { feature: string; tactic: string; goal: string }[];
 }
 
 export interface SEOAuditData {
