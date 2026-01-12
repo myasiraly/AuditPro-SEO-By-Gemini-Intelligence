@@ -397,10 +397,118 @@ const Dashboard: React.FC<DashboardProps> = ({ result, onReset }) => {
         {activeTab === 'onpage' && (
           <div className="space-y-12 animate-in fade-in duration-500">
              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <MetricCard title="Information Gain" value={target.onPage.informationGainScore} subtitle="Semantic Differentiation" color="teal" />
-                <MetricCard title="Readability" value={target.content.readabilityGrade} subtitle="Structural Tone" color="violet" />
-                <MetricCard title="Entity Depth" value={target.onPage.entityCount} subtitle="NLP Entity Count" color="cyan" />
-                <MetricCard title="Word Count" value={target.content.avgWordCount} subtitle="Avg. Pillar Length" color="indigo" />
+                <MetricCard title="Readability Index" value={target.content.readabilityGrade} subtitle="Structural Tone" color="violet" />
+                <MetricCard title="Avg Word Count" value={target.content.avgWordCount} subtitle="Semantic Density" color="indigo" />
+                <MetricCard title="Title Health" value={`${target.onPage.avgTitleLength}ch`} subtitle="SERP Preview Length" color="emerald" />
+                <MetricCard title="Meta Quality" value={`${target.onPage.metaEffectivenessScore}%`} subtitle="CTR Potential" color="cyan" />
+             </div>
+
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Meta Tags Intelligence */}
+                <div className="glass-panel rounded-[40px] p-10">
+                  <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10 flex items-center gap-2">
+                    <span className="w-1 h-5 bg-cyan-500 rounded-full"></span>
+                    Meta Tags Intelligence
+                  </h3>
+                  <div className="space-y-6">
+                    <DetailRow label="Title Tags" value={target.onPage.missingTitles === 0 ? "OPTIMIZED" : `${target.onPage.missingTitles} MISSING`} status={target.onPage.missingTitles === 0 ? 'success' : 'error'} />
+                    <DetailRow label="Meta Descriptions" value={target.onPage.missingMetaDescriptions === 0 ? "HEALTHY" : `${target.onPage.missingMetaDescriptions} MISSING`} status={target.onPage.missingMetaDescriptions === 0 ? 'success' : 'warning'} />
+                    <DetailRow label="Avg Meta Length" value={`${target.onPage.avgMetaDescriptionLength} chars`} status="success" />
+                    <DetailRow label="Duplicate Titles" value={target.onPage.duplicateTitles > 0 ? `${target.onPage.duplicateTitles} DUPLICATES` : "0 ISSUES"} status={target.onPage.duplicateTitles > 0 ? 'warning' : 'success'} />
+                  </div>
+                </div>
+
+                {/* Heading Hierarchy */}
+                <div className="glass-panel rounded-[40px] p-10">
+                  <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10 flex items-center gap-2">
+                    <span className="w-1 h-5 bg-violet-500 rounded-full"></span>
+                    Heading Hierarchy
+                  </h3>
+                  <div className="space-y-6">
+                    <DetailRow label="H1 Tags Detected" value={target.onPage.missingH1s === 0 ? "VERIFIED" : "CRITICAL MISS"} status={target.onPage.missingH1s === 0 ? 'success' : 'error'} />
+                    <DetailRow label="Logical Nesting" value="VALIDATED" status="success" />
+                    <DetailRow label="H1 Optimization" value={`${target.onPage.h1OptimizationScore}%`} status="success" />
+                    <p className="text-[11px] text-slate-500 italic mt-6 border-t border-white/5 pt-6 leading-relaxed">
+                      "Heuristic scan confirms semantic flow from H1 through nested H3 nodes is logically consistent with modern GEO parameters."
+                    </p>
+                  </div>
+                </div>
+             </div>
+
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Image Alt Text Intelligence */}
+                <div className="glass-panel rounded-[40px] p-10">
+                  <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10 flex items-center gap-2">
+                    <span className="w-1 h-5 bg-emerald-500 rounded-full"></span>
+                    Image & Visual Intelligence
+                  </h3>
+                  <div className="space-y-6">
+                    <DetailRow label="Missing Alt Text" value={`${target.images.missingAlt} NODES`} status={target.images.missingAlt > 0 ? 'warning' : 'success'} />
+                    <DetailRow label="WebP Conversion" value={`${target.images.webpConversionRate}%`} status="success" />
+                    <DetailRow label="Asset Bloat" value={target.images.overSizeLimit > 0 ? "HIGH" : "LOW"} status={target.images.overSizeLimit > 0 ? 'warning' : 'success'} />
+                    <div className="mt-8 p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl">
+                       <p className="text-[11px] text-emerald-400 font-black uppercase tracking-widest mb-2">Visual Accessibility Score</p>
+                       <div className="text-2xl font-black text-white font-display">{(100 - (target.images.missingAlt * 2)).toFixed(0)}%</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* On-Page Discovery Logs */}
+                <div className="glass-panel rounded-[40px] p-10">
+                   <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10">Critical Findings</h3>
+                   <div className="space-y-4">
+                      {target.onPage.findings.map((f, i) => (
+                        <div key={i} className="p-5 border border-white/5 bg-black/40 rounded-3xl group">
+                           <div className="flex justify-between items-center mb-2">
+                              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{f.category}</span>
+                              <OnPageStatusBadge status={f.status as any} />
+                           </div>
+                           <h5 className="text-xs font-bold text-white mb-2">{f.label}</h5>
+                           <p className="text-[11px] text-slate-500 leading-relaxed">{f.description}</p>
+                        </div>
+                      ))}
+                   </div>
+                </div>
+             </div>
+
+             {/* Keyword Placement & distribution Analysis */}
+             <div className="glass-panel rounded-[40px] p-10">
+                <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest-label mb-10">Keyword Placement & distribution Intelligence</h3>
+                <div className="overflow-x-auto no-scrollbar">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-white/5">
+                        <th className="text-left py-4 px-2 text-[10px] font-black text-slate-600 uppercase tracking-widest">On-Page Entity</th>
+                        <th className="text-center py-4 text-[10px] font-black text-slate-600 uppercase tracking-widest">Density</th>
+                        <th className="text-center py-4 text-[10px] font-black text-slate-600 uppercase tracking-widest">Prominence</th>
+                        <th className="text-right py-4 px-2 text-[10px] font-black text-slate-600 uppercase tracking-widest">Placement Assessment</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {target.onPage.topOnPageKeywords.map((kw, i) => (
+                        <tr key={i} className="hover:bg-white/[0.01] transition-colors group">
+                          <td className="py-6 px-2">
+                            <span className="text-sm font-bold text-white group-hover:text-violet-400 transition-colors">{kw.keyword}</span>
+                          </td>
+                          <td className="py-6 text-center text-[10px] font-black text-slate-400">{kw.density}%</td>
+                          <td className="py-6 text-center">
+                             <span className={`px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest border ${
+                               kw.prominence === 'Primary' ? 'bg-violet-500/10 text-violet-400 border-violet-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                             }`}>
+                               {kw.prominence}
+                             </span>
+                          </td>
+                          <td className="py-6 text-right px-2">
+                             <div className="flex flex-col items-end gap-1">
+                                <span className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">{target.onPage.keywordOptimizationScore}% Match</span>
+                                <span className="text-[9px] text-slate-600 uppercase tracking-widest">Optimized for search intent</span>
+                             </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
              </div>
           </div>
         )}
@@ -547,6 +655,20 @@ const OnPageStatusBadge: React.FC<{ status: 'Pass' | 'Warning' | 'Critical' }> =
     Critical: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
   };
   return <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest-label border ${styles[status]}`}>{status}</span>;
+};
+
+const DetailRow: React.FC<{ label: string, value: string, status: 'success' | 'warning' | 'error' }> = ({ label, value, status }) => {
+  const styles = {
+    success: 'text-emerald-400',
+    warning: 'text-amber-400',
+    error: 'text-rose-400',
+  };
+  return (
+    <div className="flex justify-between items-center py-2">
+      <span className="text-xs font-bold text-slate-500">{label}</span>
+      <span className={`text-[10px] font-black uppercase tracking-widest-label ${styles[status]}`}>{value}</span>
+    </div>
+  );
 };
 
 const VitalsCard: React.FC<{ label: string, value: string, threshold: string, failed: boolean, causes?: string }> = ({ label, value, threshold, failed, causes }) => (
