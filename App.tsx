@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { GeminiService } from './services/gemini';
 import { AuditResult } from './types';
@@ -48,7 +47,7 @@ const App: React.FC = () => {
 
   const handleAudit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!targetUrl) return;
+    if (!targetUrl || !competitorUrl) return;
     setIsLoading(true);
     setError(null);
     try {
@@ -146,10 +145,11 @@ const App: React.FC = () => {
               <div className="group relative">
                 <input
                   type="url"
-                  placeholder="Competitor URL (Optional)"
+                  placeholder="Competitor URL (Required for Comparison)"
                   className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-cyan-500/50 transition-all font-semibold placeholder:text-slate-500 text-white"
                   value={competitorUrl}
                   onChange={(e) => setCompetitorUrl(e.target.value)}
+                  required
                 />
               </div>
               <button
